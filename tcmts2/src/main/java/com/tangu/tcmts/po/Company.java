@@ -10,4 +10,6 @@ public class Company {
     private String companyAddress;
     private String companyTel;
     private String companyContact;
+    
+
 }
