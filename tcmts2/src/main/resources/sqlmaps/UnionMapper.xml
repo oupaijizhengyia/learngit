@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tangu.tcmts.dao.UnionMapper">
+
+    <update id="updateUnion" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE
+            recipe
+            SET
+            recipe.union_id = #{item.unionId}
+            WHERE
+            recipe.id = #{item.recipeId}
+        </foreach>
+    </update>
+</mapper>

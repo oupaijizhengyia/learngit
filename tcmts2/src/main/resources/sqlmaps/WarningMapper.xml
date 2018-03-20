@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tangu.tcmts.dao.WaringMapper">
+
+    <select id="listWarning" parameterType="com.tangu.tcmts.po.WarningDTO" resultType="com.tangu.tcmts.po.WarningDO">
+        SELECT
+          w.*,
+          r.recipe_bh,
+          r.recipient_name
+        FROM
+          warning w,
+          recipe r
+        WHERE
+             r.id = w.recipe_id
+        AND   r.create_time BETWEEN #{startTime} AND #{endTime}
+        <if test="operateType != null and operateType != 0">
+            AND operate_type = #{operateType}
+        </if>
+        <if test="warningStatus != null">
+            AND  warning_status = CASE WHEN #{warningStatus} THEN 1 ELSE 0 END
+        </if>
+    </select>
+
+    <insert id="addWarning" parameterType="com.tangu.tcmts.po.WarningDO">
+        INSERT INTO warning
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="recipeId != null">
+                recipe_id,
+            </if>
+            <if test="operateType != null">
+                operate_type,
+            </if>
+            <if test="startTime != null">
+                start_time,
+            </if>
+            <if test="endTime != null">
+                end_time,
+            </if>
+            <if test="warningStatus != null">
+                warning_status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="recipeId != null">
+                #{recipeId},
+            </if>
+            <if test="recipeBh != null">
+                #{recipeBh},
+            </if>
+            <if test="recipentName != null">
+                #{recipentName},
+            </if>
+            <if test="operateType != null">
+                #{operateType},
+            </if>
+            <if test="startTime != null">
+                #{startTime},
+            </if>
+            <if test="endTime != null">
+                #{endTime},
+            </if>
+            <if test="warningStatus != null">
+                CASE WHEN #{warningStatus} THEN 1 ELSE 0 END
+            </if>
+        </trim>
+    </insert>
+
+
+
+</mapper>

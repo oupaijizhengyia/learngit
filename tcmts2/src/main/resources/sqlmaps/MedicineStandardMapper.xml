@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.MedicineStandardMapper">
+	<resultMap id="BaseResultMap" type="com.tangu.tcmts.po.MedicineStandardDO">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="medicine_id" property="medicineId" jdbcType="INTEGER" />
+		<result column="standard_name" property="standardName"
+				jdbcType="VARCHAR" />
+		<result column="warning_value" property="warningValue"
+				jdbcType="DECIMAL" />
+		<result column="standard_code" property="standardCode"
+				jdbcType="VARCHAR" />
+		<result column="batch_number" property="batchNumber" jdbcType="VARCHAR" />
+		<result column="manufacturing_enterprise" property="manufacturingEnterprise"
+				jdbcType="VARCHAR" />
+		<result column="producing_area" property="producingArea"
+				jdbcType="VARCHAR" />
+		<result column="producer_id" property="producerId" jdbcType="INTEGER" />
+	</resultMap>
+	<insert id="addMedicineStandard" parameterType="java.util.List">
+		insert into medicine_standard ( medicine_id, standard_name,
+		standard_code, batch_number,
+		manufacturing_enterprise, producing_area,
+		producer_id)
+		values
+		<foreach collection="list" item="item" index="index" separator="," >
+			( #{item.medicineId,jdbcType=INTEGER},
+			#{item.standardName,jdbcType=VARCHAR},
+			#{item.standardCode,jdbcType=VARCHAR}, #{item.batchNumber,jdbcType=VARCHAR},
+			#{item.manufacturingEnterprise,jdbcType=VARCHAR},
+			#{item.producingArea,jdbcType=VARCHAR},
+			#{item.producerId,jdbcType=INTEGER})
+		</foreach>
+	</insert>
+	<update id="updateMedicineStandard" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open=""
+				 close="" separator=";">
+			UPDATE medicine_standard
+			<set>
+				standard_name=#{item.standardName},
+				standard_code=#{item.standardCode},
+				manufacturing_enterprise=#{item.manufacturingEnterprise},
+				producing_area=#{item.producingArea},
+				mod_time=NOW()
+			</set>
+			WHERE id=#{item.id}
+		</foreach>
+	</update>
+	<select id="listNotLoadMedicine" parameterType="com.tangu.tcmts.po.MedicineStandardDTO" resultType="com.tangu.tcmts.po.MedicineStandardDO">
+		<if test="warehouseType != 3">
+			SELECT  ms.id AS standard_id,m.medicine_code,m.initial_code,m.mnemonic_code,
+			m.`id` AS medicineId,CONCAT(m.`medicine_name`,IFNULL(ms.standard_name,"")) AS medicineName,
+			ms.standard_code,ms.manufacturing_enterprise,producing_area ,ms.standard_name as standardName
+			FROM medicine m
+			LEFT JOIN medicine_standard ms ON ms.`medicine_id`=m.`id`
+			WHERE IFNULL(ms.standard_name,'') != '' AND m.use_state = 0
+		</if>
+		<if test="warehouseType == 3">
+			SELECT m.`id` AS medicineId,m.medicine_name,m.medicine_code,m.initial_code,m.mnemonic_code
+			FROM medicine m
+			where m.use_state = 0
+		</if>
+	</select>
+
+	<select id="listLoadMedicine" parameterType="com.tangu.tcmts.po.MedicineStandardDTO" resultType="com.tangu.tcmts.po.MedicineStandardDO">
+		<if test="warehouseType != 3">
+			SELECT ws.id AS warehouse_standard_id, ms.id AS standard_id,m.`id` AS medicineId,CONCAT(m.`medicine_name`,IFNULL(ms.standard_name,"")) AS medicineName,
+			ms.standard_code,ms.manufacturing_enterprise,producing_area,m.medicine_code,m.initial_code,m.mnemonic_code
+			FROM `warehouse_standard` ws 
+			INNER JOIN `medicine` m ON ws.`medicine_id` = m.`id`
+			LEFT JOIN `medicine_standard` ms ON ws.`standard_id` = ms.`id`
+		</if>
+		<if test="warehouseType == 3">
+			SELECT ws.id AS warehouse_standard_id,m.`id` AS medicineId,m.medicine_name,m.medicine_code,m.initial_code,m.mnemonic_code
+			FROM medicine m 
+			INNER JOIN `warehouse_standard` ws ON ws.`medicine_id`=m.`id`
+		</if>
+		where m.use_state = 0 AND ws.warehouse_id=#{warehouseId} AND 	ws.batch_number IS NULL
+	</select>
+	<delete id="deleteMedicineStandard" parameterType="java.util.List">
+		DELETE FROM medicine_standard WHERE id in 
+		<foreach item="item" collection="list" separator="," open="("  close=")">
+			#{item.id}
+		</foreach>
+	</delete>
+	<select id="countWarehouseStandradById" parameterType="java.util.List" resultType="java.lang.Integer">
+		SELECT  COUNT(*) FROM `warehouse_standard` WHERE standard_id IN 
+		<foreach item="item" collection="list" separator="," open="("  close=")">
+			#{item.id}
+		</foreach>
+	</select>
+	<select id="listStandardByCode" parameterType="com.tangu.tcmts.po.MedicineDO" resultType="java.lang.Integer">
+		SELECT  COUNT(*) FROM `medicine_standard` WHERE standard_code IN 
+		<foreach item="item" collection="standardList" separator="," open="("  close=")">
+			#{item.standardCode}
+		</foreach>
+		<if test=" id != null">
+			AND medicine_id != #{id}
+		</if>
+		AND standard_code IS NOT NULL
+	</select>
+	<select id="listMedicineStandardByMedicineId" parameterType="java.util.List" resultType="com.tangu.tcmts.po.MedicineStandardDO">
+		SELECT ms.id,ms.standard_name,ms.standard_code,ms.manufacturing_enterprise,ms.producing_area
+		,m.`medicine_name`
+		FROM `medicine_standard` ms,medicine m
+		WHERE 
+		m.`id` = ms.`medicine_id`
+		AND 
+		ms.medicine_id IN
+		<foreach item="item" collection="list" separator="," open="("  close=")">
+			#{item.id}
+		</foreach>
+	</select>
+	<select id="getStandardById" parameterType="com.tangu.tcmts.po.MedicineStandardDO" resultType="com.tangu.tcmts.po.MedicineStandardDO">
+		SELECT ms.id,ms.standard_name,ms.standard_code,ms.manufacturing_enterprise,ms.producing_area
+		,m.`medicine_name`
+		FROM `medicine_standard` ms,medicine m
+		WHERE 
+		m.`id` = ms.`medicine_id`
+		AND
+		ms.id = #{id}
+	</select>
+	<select id="getMedicineByNumber" parameterType="com.tangu.tcmts.po.MedicineStandardDO" resultType="com.tangu.tcmts.po.MedicineStandardDO">
+		select medicine_standard.medicine_id as medicineId,medicine_standard.id as id,
+	concat(medicine.medicine_name,medicine_standard.standard_name) as standardName
+	from medicine_standard,medicine 
+	where medicine_standard.medicine_id=medicine.medicine_id and standard_code=#{standardCode,jdbcType=VARCHAR}
+	</select>
+</mapper>

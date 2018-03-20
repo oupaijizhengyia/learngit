@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.MedicineRelationMapper">
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.MedicineRelationDO">
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_medicine_name" property="hospitalMedicineName"
+            jdbcType="VARCHAR" />
+    <result column="hospital_medicine_code" property="hospitalMedicineCode"
+            jdbcType="VARCHAR" />
+    <result column="initial_code" property="initialCode" jdbcType="VARCHAR" />
+    <result column="native_medicine_id" property="nativeMedicineId"
+            jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="medicineName" property="medicineName" jdbcType="VARCHAR" />
+    <result column="unit_type" property="unitType" jdbcType="INTEGER" />
+  </resultMap>
+  <insert id="insertMedicineRelation" parameterType="java.util.List">
+    insert into medicine_relation (hospital_medicine_name,
+    hospital_medicine_code,
+    initial_code, native_medicine_id, hospital_id)
+    values
+    <foreach collection="list" item="item" index="index" separator="," >
+      ( #{item.hospitalMedicineName,jdbcType=VARCHAR},
+      #{item.hospitalMedicineCode,jdbcType=VARCHAR},
+      #{item.initialCode,jdbcType=VARCHAR}, #{item.nativeMedicineId,jdbcType=INTEGER},
+      #{item.hospitalId,jdbcType=INTEGER})
+    </foreach>
+  </insert>
+  <update id="updateMedicineRelationById" parameterType="com.tangu.tcmts.po.MedicineRelationDO">
+    update medicine_relation
+    set hospital_medicine_name = #{hospitalMedicineName,jdbcType=VARCHAR},
+    hospital_medicine_code = #{hospitalMedicineCode,jdbcType=VARCHAR},
+    initial_code = #{initialCode,jdbcType=VARCHAR},
+    native_medicine_id = #{nativeMedicineId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <delete id="deleteMedicineRelationById" parameterType="com.tangu.tcmts.po.MedicineRelationDTO">
+    DELETE FROM `medicine_relation` WHERE id = #{id}
+  </delete>
+  <select id="listMedicineRelation" parameterType="com.tangu.tcmts.po.MedicineRelationDTO" resultMap="BaseResultMap">
+    SELECT mr.id,mr.hospital_medicine_name,mr.hospital_medicine_code
+    ,m.medicine_name AS medicineName , native_medicine_id
+    FROM medicine_relation mr,`medicine` m
+    WHERE m.id=mr.native_medicine_id
+    <if test=" hospitalId != null ">
+      AND hospital_id=#{hospitalId}
+    </if>
+    <if test="medicineNameOrCode != null and medicineNameOrCode != '' ">
+      AND (mr.hospital_medicine_name LIKE CONCAT("%",#{medicineNameOrCode},"%")
+      OR mr.hospital_medicine_code LIKE CONCAT("%",#{medicineNameOrCode},"%")
+      OR m.medicine_code LIKE CONCAT("%",#{medicineNameOrCode},"%")
+      OR m.medicine_name LIKE CONCAT("%",#{medicineNameOrCode},"%"))
+    </if>
+    <if test=" id != null">
+      AND mr.id=#{id}
+    </if>
+    ORDER BY mr.mod_time DESC
+  </select>
+	<select id="getMedicineRelationByName" parameterType="com.tangu.tcmts.po.MedicineRelationDO" resultMap="BaseResultMap">
+		select id, hospital_medicine_name,hospital_medicine_code  from medicine_relation
+		<where>
+			hospital_id = #{hospitalId}
+			<if test="id != null">
+				AND id != #{id}
+			</if>
+		</where>
+	</select>
+	<!-- 版本稳定可删除   -->
+	<!-- <select id="getMedicineByNativeId" parameterType="com.tangu.tcmts.po.MedicineRelationDO" resultMap="BaseResultMap">
+		SELECT id FROM `medicine_relation` WHERE 
+		native_medicine_id in 
+		<foreach item="item" index="index" collection="ids" open="("  separator="," close=")">  
+			#{item}
+		</foreach>
+		AND hospital_id = #{hospitalId} LIMIT 1
+	</select> -->
+	<select id="listMedicineRelationAll"  resultMap="BaseResultMap">
+		SELECT mr.id,mr.hospital_medicine_name,mr.hospital_medicine_code,
+		mr.native_medicine_id,mr.hospital_id,m.medicine_name as medicineName,m.special_boil_type,unit_type
+		FROM medicine_relation  mr
+		INNER JOIN  medicine m ON mr.native_medicine_id = m.id
+	</select>
+	<select id="getMnemonicCode" resultType = "com.tangu.tcmts.po.MedicineRelationDO">
+		SELECT mr.`id`,mr.`hospital_medicine_code`,mr.native_medicine_id,mr.`initial_code`,mr.hospital_id,
+		m.id AS medicine_id,mr.`hospital_medicine_name`,m.unit_type,
+		m.standard,m.special_boil_type AS specialBoilType,m.`initial_code` AS medicinePinyin,
+		SUBSTRING(IFNULL(a.storage_location,''),1,6) AS mnemonic_code,m.common_code
+	  	FROM medicine m
+	  	LEFT JOIN `medicine_relation` mr ON mr.native_medicine_id=m.id
+	  	LEFT JOIN (SELECT medicine_id,storage_location FROM warehouse_standard WHERE warehouse_id 
+		IN (SELECT id FROM warehouse WHERE warehouse_type!=1) AND IFNULL(batch_number,'')=''
+		)a ON a.medicine_id=mr.native_medicine_id
+	  	ORDER BY mr.hospital_id DESC
+	</select>
+</mapper>

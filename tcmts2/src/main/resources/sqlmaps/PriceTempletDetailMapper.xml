@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.PriceTempletDetailMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.PriceTempletDetailDTO" >
+  </resultMap>
+  <select id="selectByTemIdAndMedId" resultMap="BaseResultMap">
+  	select ptd.id AS templetDetailId, templet_id, medicine_id, 
+        trade_price, trade_price AS nowTradePrice,
+        retail_price, retail_price AS nowRetailPrice, 
+        price_start, price_start AS OldPriceStart,
+        m.medicine_name, m.initial_code, m.medicine_code, m.standard
+        from price_templet_detail ptd
+        left join medicine m on m.id = ptd.medicine_id
+        <where>
+        	medicine_last = 1
+        	<if test="templetId != null">
+        		and templet_id = #{templetId}
+        	</if>
+        	<if test="medicineId != null">
+        		and medicine_id = #{medicineId}
+        	</if>
+        </where>
+        order by medicine_id
+  </select>
+  <insert id="insertSelective" parameterType="com.tangu.tcmts.po.PriceTempletDetailDTO" >
+    <selectKey resultType="java.lang.Integer" keyProperty="templetDetailId" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into price_templet_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="templetId != null" >
+        templet_id,
+      </if>
+      <if test="medicineId != null" >
+        medicine_id,
+      </if>
+      <if test="priceStart != null" >
+        price_start,
+      </if>
+      <if test="priceEnd != null" >
+        price_end,
+      </if>
+      <if test="nowTradePrice != null" >
+        trade_price,
+      </if>
+      <if test="nowRetailPrice != null" >
+        retail_price,
+      </if>
+      <if test="medicineLast != null" >
+        medicine_last,
+      </if>
+      <if test="modUser != null" >
+      	mod_user,
+      </if>
+      <if test="modifyTime != null" >
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="templetId != null" >
+        #{templetId,jdbcType=INTEGER},
+      </if>
+      <if test="medicineId != null" >
+        #{medicineId,jdbcType=INTEGER},
+      </if>
+      <if test="priceStart != null" >
+        #{priceStart,jdbcType=DATE},
+      </if>
+      <if test="priceEnd != null" >
+        #{priceEnd,jdbcType=DATE},
+      </if>
+      <if test="nowTradePrice != null" >
+        #{nowTradePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="nowRetailPrice != null" >
+        #{nowRetailPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="medicineLast != null" >
+        #{medicineLast,jdbcType=BIT},
+      </if>
+      <if test="modUser != null" >
+      	#{modUser},
+      </if>
+      <if test="modifyTime != null" >
+      	#{modifyTime},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByIdSelective" parameterType="com.tangu.tcmts.po.PriceTempletDetailDTO" >
+    update price_templet_detail
+    <set >
+      <if test="templetId != null" >
+        templet_id = #{templetId,jdbcType=INTEGER},
+      </if>
+      <if test="medicineId != null" >
+        medicine_id = #{medicineId,jdbcType=INTEGER},
+      </if>
+      <if test="priceStart != null" >
+        price_start = #{priceStart,jdbcType=DATE},
+      </if>
+      <if test="priceEnd != null" >
+        price_end = #{priceEnd,jdbcType=DATE},
+      </if>
+      <if test="nowTradePrice != null" >
+        trade_price = #{nowTradePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="nowRetailPrice != null" >
+        retail_price = #{nowRetailPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="medicineLast != null" >
+        medicine_last = #{medicineLast,jdbcType=BIT},
+      </if>
+      <if test="modUser != null" >
+      	mod_user = #{modUser}
+      </if>
+    </set>
+    where id = #{templetDetailId,jdbcType=INTEGER}
+  </update>
+  
+  <insert id="updateListById">
+  	insert into price_templet_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="list[0].templetDetailId != null">
+      	id,
+      </if>
+      <if test="list[0].templetId != null" >
+        templet_id,
+      </if>
+      <if test="list[0].medicineId != null" >
+        medicine_id,
+      </if>
+      <if test="list[0].priceStart != null" >
+        price_start,
+      </if>
+      <if test="list[0].priceEnd != null" >
+        price_end,
+      </if>
+      <if test="list[0].nowTradePrice != null" >
+        trade_price,
+      </if>
+      <if test="list[0].nowRetailPrice != null" >
+        retail_price,
+      </if>
+      <if test="list[0].medicineLast != null" >
+        medicine_last,
+      </if>
+      <if test="list[0].modUser != null" >
+      	mod_user,
+      </if>
+    </trim>
+    values
+    <foreach collection="list" item="item" separator=",">
+    <trim prefix=" (" suffix=")" suffixOverrides="," >
+      <if test="item.templetDetailId != null">
+      	#{item.templetDetailId},
+      </if>
+      <if test="item.templetId != null" >
+        #{item.templetId,jdbcType=INTEGER},
+      </if>
+      <if test="item.medicineId != null" >
+        #{item.medicineId,jdbcType=INTEGER},
+      </if>
+      <if test="item.priceStart != null" >
+        #{item.priceStart,jdbcType=DATE},
+      </if>
+      <if test="item.priceEnd != null" >
+        #{item.priceEnd,jdbcType=DATE},
+      </if>
+      <if test="item.nowTradePrice != null" >
+        #{item.nowTradePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="item.nowRetailPrice != null" >
+        #{item.nowRetailPrice ,jdbcType=DECIMAL},
+      </if>
+      <if test="item.medicineLast != null" >
+        #{item.medicineLast,jdbcType=BIT},
+      </if>
+      <if test="item.modUser != null" >
+      	#{item.modUser},
+      </if>
+    </trim>
+    </foreach>
+	on duplicate key update 
+	<trim suffixOverrides="," >
+      <if test="list[0].templetDetailId != null">
+      	id = values (id),
+      </if>
+      <if test="list[0].templetId != null" >
+        templet_id = values (templet_id),
+      </if>
+      <if test="list[0].medicineId != null" >
+	      medicine_id = values (medicine_id),
+      </if>
+      <if test="list[0].priceStart != null" >
+	      price_start = values (price_start),
+      </if>
+      <if test="list[0].priceEnd != null" >
+	      price_end = values (price_end),
+      </if>
+      <if test="list[0].nowTradePrice != null" >
+	      trade_price = values (trade_price),
+      </if>
+      <if test="list[0].nowRetailPrice != null" >
+	      retail_price = values (retail_price),
+      </if>
+      <if test="list[0].medicineLast != null" >
+	      medicine_last = values (medicine_last),
+      </if>
+      <if test="list[0].modUser != null" >
+      	  mod_user = values (mod_user),
+      </if>
+    </trim>
+  </insert>
+  
+  <insert id="insertList"  useGeneratedKeys="true" keyProperty="templetDetailId" >
+    insert into price_templet_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="list[0].templetId != null" >
+        templet_id,
+      </if>
+      <if test="list[0].medicineId != null" >
+        medicine_id,
+      </if>
+      <if test="list[0].priceStart != null" >
+        price_start,
+      </if>
+      <if test="list[0].priceEnd != null" >
+        price_end,
+      </if>
+      <if test="list[0].nowTradePrice != null" >
+        trade_price,
+      </if>
+      <if test="list[0].nowRetailPrice != null" >
+        retail_price,
+      </if>
+      <if test="list[0].medicineLast != null" >
+        medicine_last,
+      </if>
+      <if test="list[0].modUser != null" >
+      	mod_user,
+      </if>
+    </trim>
+    values
+    <foreach collection="list" item="item" separator=",">
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="item.templetId != null" >
+        #{item.templetId,jdbcType=INTEGER},
+      </if>
+      <if test="item.medicineId != null" >
+        #{item.medicineId,jdbcType=INTEGER},
+      </if>
+      <if test="item.priceStart != null" >
+        #{item.priceStart,jdbcType=DATE},
+      </if>
+      <if test="item.priceEnd != null" >
+        #{item.priceEnd,jdbcType=DATE},
+      </if>
+      <if test="item.nowTradePrice != null" >
+        #{item.nowTradePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="item.nowRetailPrice != null" >
+        #{item.nowRetailPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="item.medicineLast != null" >
+        #{item.medicineLast,jdbcType=BIT},
+      </if>
+      <if test="item.modUser != null" >
+      	#{item.modUser},
+      </if>
+    </trim>
+    </foreach>
+  </insert>
+  
+  <sql id="price_Column_List" >
+    medicine_id, IFNULL(trade_price,0) as trade_price, IFNULL(retail_price,0)as retail_price, price_start, price_end
+  </sql>
+  <select id="getPriceByTemIdAndMedId" parameterType="com.tangu.tcmts.po.PriceTempletDetailDTO" resultType="com.tangu.tcmts.po.PriceTempletDetailDTO">
+  	SELECT 
+  	<include refid="price_Column_List" />
+     FROM price_templet_detail 
+     <where>
+     	<if test="templetId != null">
+      		AND templet_id = #{templetId}
+     	</if>
+     	<if test="medicineId != null">
+     		AND medicine_id = #{medicineId}
+     	</if>
+     	AND #{priceStart:DATE}<![CDATA[>=]]>price_start AND #{priceStart:DATE}<![CDATA[<=]]>IFNULL(price_end,'3014-09-09')
+     </where>
+     ORDER BY id DESC
+     LIMIT 1
+  </select>
+  
+  <select id="listPriceByTemIdsOrMedIds" parameterType="com.tangu.tcmts.po.PriceTempletDetailDTO" resultType="com.tangu.tcmts.po.PriceTempletDetailDTO">
+  	SELECT 
+  	<include refid="price_Column_List" />
+     FROM price_templet_detail 
+     <where>
+     	<if test="templetId != null">
+      		AND templet_id = #{templetId}
+     	</if>
+     	<if test="templetIdList != null">
+      		AND templet_id IN
+      		(
+			<foreach collection="templetIdList" item="item" index="index" separator=",">
+		    	#{item}
+		    </foreach>
+		    )
+     	</if>
+     	<if test="medicineIdList != null">
+     		AND medicine_id IN
+     		(
+			<foreach collection="medicineIdList" item="item" index="index" separator=",">
+		    	#{item}
+		    </foreach>
+		    )
+     	</if>
+     	AND #{priceStart:DATE}<![CDATA[>=]]>price_start
+     	AND #{priceStart:DATE}<![CDATA[<=]]>IFNULL(price_end,'3014-09-09')
+     </where>
+     ORDER BY id DESC
+  </select>
+</mapper>

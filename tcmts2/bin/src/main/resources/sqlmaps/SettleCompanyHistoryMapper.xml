@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.SettleCompanyHistoryMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.SettleCompanyHistory" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="mod_user" property="modUser" jdbcType="INTEGER" />
+  </resultMap>
+  <select id="listHistoryRecords" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    SELECT
+    employee.employee_name AS mod_user_name, sch.mod_user,sch.mod_comment,sch.mod_time
+    FROM settle_company_history sch LEFT JOIN employee ON sch.mod_user=employee.id
+          LEFT JOIN settle_company sc ON sch.settle_company_id=sc.id
+    where sch.settle_company_id = #{settleCompanyId,jdbcType=INTEGER}
+    ORDER BY mod_time desc
+  </select>
+
+  <insert id="insertHistoryRecords" parameterType="com.tangu.tcmts.po.SettleCompanyDO">
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    INSERT INTO settle_company_history
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="settleCompanyId != null and settleCompanyId>0">
+        settle_company_id,
+      </if>
+      <if test="modComment !=null">
+        mod_comment,
+      </if>
+      <if test="modUser != null and modUser>0">
+        mod_user,
+      </if>
+      <if test="modTime != null">
+        mod_time,
+      </if>
+    </trim>
+    <trim prefix="values(" suffix=")" suffixOverrides=",">
+      <if test="id != null and id>0">
+        #{id},
+      </if>
+      <if test="modComment !=null">
+        #{mod_comment},
+      </if>
+      <if test="modTime != null">
+        #{mod_time},
+      </if>
+      <if test="modUser != null and modUser>0">
+        #{modUser},
+      </if>
+    </trim>
+  </insert>
+
+</mapper>

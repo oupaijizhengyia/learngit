@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.EmployeeMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.Employee" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="employee_name" property="employeeName" jdbcType="VARCHAR" />
+    <result column="initial_code" property="initialCode" jdbcType="VARCHAR" />
+    <result column="use_state" property="useState" jdbcType="BIT" />
+    <result column="employee_code" property="employeeCode" jdbcType="VARCHAR" />
+    <result column="employee_tel" property="employeeTel" jdbcType="VARCHAR" />
+    <result column="role_id" property="roleId" jdbcType="INTEGER" />
+    <result column="employee_password" property="employeePassword" jdbcType="VARCHAR" />
+    <result column="is_operator" property="isOperator" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="mod_time" property="modTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <select id="getEmployeeContent" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    e.id, employee_name, use_state, employee_code, employee_tel, role_id,rolename,is_operator, create_time, mod_time
+    from employee e LEFT JOIN sys_role s ON e.role_id=s.id
+    where e.id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="listEmployeeContent" resultMap="BaseResultMap" parameterType="java.util.List" >
+    select
+    id, employee_name, use_state, employee_code, employee_tel, role_id,is_operator, create_time, mod_time
+    from employee where id IN
+    <foreach item="item" collection="list" separator="," open="("  close=")">
+      #{item.id}
+    </foreach>
+  </select>
+  <select id="getRepeatEmployee" parameterType="com.tangu.tcmts.po.Employee" resultType="java.lang.Integer">
+    select count(*) from employee
+    where employee_name=#{employeeName}
+    <if test=" id != null ">
+      AND id != #{id}
+    </if>
+  </select>
+  <select id="listEmployees" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.Employee">
+    SELECT
+    employee.id,employee_name,use_state,employee_code,employee.role_id, employee_tel,is_operator,sys_role.rolename
+    FROM employee LEFT JOIN  sys_role ON  employee.role_id=sys_role.id
+    <where>
+      <if test="employeeName != null">
+        AND employee_name like CONCAT('%',#{employeeName},'%')
+      </if>
+      <if test="employeeCode != null">
+        AND employee_code LIKE CONCAT('%',#{employeeCode},'%')
+      </if>
+      <if test="roleId != null">
+        AND role_id = #{roleId}
+      </if>
+      <if test="useState != null">
+        AND use_state = #{useState}
+      </if>
+    </where>
+    ORDER BY create_time DESC
+  </select>
+
+  <insert id="insertEmployee" parameterType="com.tangu.tcmts.po.Employee" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into employee
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="employeeName != null" >
+        employee_name,
+      </if>
+      <if test="initialCode != null" >
+        initial_code,
+      </if>
+      <if test="useState != null" >
+        use_state,
+      </if>
+      <if test="employeeCode != null" >
+        employee_code,
+      </if>
+      <if test="employeeTel != null" >
+        employee_tel,
+      </if>
+      <if test="roleId != null" >
+        role_id,
+      </if>
+      <if test="employeePassword != null" >
+        employee_password,
+      </if>
+      <if test="isOperator != null" >
+        is_operator,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modTime != null" >
+        mod_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="employeeName != null" >
+        #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="initialCode != null" >
+        #{initialCode,jdbcType=VARCHAR},
+      </if>
+      <if test="useState != null" >
+        #{useState,jdbcType=BIT},
+      </if>
+      <if test="employeeCode != null" >
+        #{employeeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeTel != null" >
+        #{employeeTel,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null" >
+        #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="employeePassword != null" >
+        #{employeePassword,jdbcType=VARCHAR},
+      </if>
+      <if test="isOperator != null" >
+        #{isOperator,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modTime != null" >
+        #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateEmployee" parameterType="com.tangu.tcmts.po.Employee" >
+    update employee
+    <set >
+      <if test="employeeName != null" >
+        employee_name = #{employeeName,jdbcType=VARCHAR},
+      </if>
+      <if test="initialCode != null" >
+        initial_code = #{initialCode,jdbcType=VARCHAR},
+      </if>
+      <if test="useState != null" >
+        use_state = #{useState,jdbcType=BIT},
+      </if>
+      <if test="employeeCode != null" >
+        employee_code = #{employeeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="employeeTel != null" >
+        employee_tel = #{employeeTel,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null" >
+        role_id = #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="employeePassword != null" >
+        employee_password = #{employeePassword,jdbcType=VARCHAR},
+      </if>
+      <if test="isOperator != null" >
+        is_operator = #{isOperator,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modTime != null" >
+        mod_time = #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateUseState" parameterType="com.tangu.tcmts.po.Employee">
+    UPDATE employee
+    SET use_state=#{useState},
+        mod_time=#{modTime}
+    WHERE id=#{id}
+  </update>
+  <update id="updateToDefalutPassword" parameterType="com.tangu.tcmts.po.Employee">
+    UPDATE employee
+    SET employee_password='28c8edde3d61a0411511d3b1866f0636',
+        mod_time=#{modTime}
+    WHERE id=#{id}
+  </update>
+  <select id="findEmployee" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.Employee">
+    SELECT
+    employee.id,employee_name,use_state,employee_code,employee.role_id, employee_tel,is_operator
+    FROM employee
+   where (employee_name= #{employeeName,jdbcType=VARCHAR} or employee_code=#{employeeName,jdbcType=VARCHAR}) 
+   and is_operator=#{isOperator,jdbcType=INTEGER}
+   and use_state=#{useState,jdbcType=INTEGER}
+  </select>
+  <update id="updatePassword" parameterType="com.tangu.tcmts.po.Employee">
+    UPDATE employee
+    SET employee_password=#{newEmployeePassword},
+        mod_time=#{modTime}
+    WHERE id = #{id} and employee_password = #{employeePassword}
+  </update>
+  <select id="findAllPrivilegeListByRole" resultType="com.tangu.tcmts.po.Employee" parameterType="com.tangu.tcmts.po.Employee" >
+    select LTRIM(sys_function.code) as functionCode, sys_function.name as functionName
+    from sys_role_function,sys_function
+    where sys_role_function.function_id=sys_function.id and role_id = #{roleId,jdbcType=INTEGER}
+     and sys_function.use_state=0
+     <if test="functionCode != null and functionCode != ''" >
+        and sys_function.code = #{functionCode,jdbcType=VARCHAR}
+      </if>
+  </select>
+</mapper>

@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.TransferMedicineMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.TransferMedicine" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="medicine_name" property="medicineName" jdbcType="VARCHAR" />
+    <result column="unit" property="unit" jdbcType="VARCHAR" />
+    <result column="weight_every" property="weightEvery" jdbcType="DECIMAL" />
+    <result column="eat_type" property="eatType" jdbcType="VARCHAR" />
+    <result column="bill_id" property="billId" jdbcType="BIGINT" />
+    <result column="medicine_code" property="medicineCode" jdbcType="VARCHAR" />
+    <result column="bill_code" property="billCode" jdbcType="VARCHAR" />
+    <result column="batch_number" property="batchNumber" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="mnemonic_code" property="mnemonicCode" jdbcType="VARCHAR" />
+    <result column="sys_medicine_name" property="sysMedicineName" jdbcType="VARCHAR" />
+    <result column="special_boil_type" property="specialBoilType" jdbcType="VARCHAR" />
+    <result column="print_medicine" property="printMedicine" jdbcType="VARCHAR" />
+    <result column="weight" property="weight" jdbcType="DECIMAL" />
+    <result column="money" property="money" jdbcType="DECIMAL" />
+    <result column="hospital_code" property="hospitalCode" jdbcType="VARCHAR" />
+    <result column="medicine_source" property="medicineSource" jdbcType="VARCHAR" />
+    <result column="medicine_address" property="medicineAddress" jdbcType="VARCHAR" />
+    <result column="standard_weight" property="standardWeight" jdbcType="REAL" />
+    <result column="standard" property="standard" jdbcType="VARCHAR" />
+    <result column="factory" property="factory" jdbcType="VARCHAR" />
+    <result column="name_medicineName" property="name_medicineName" jdbcType="VARCHAR"/>
+  </resultMap>
+
+  <select id="getMessageByTransferRecipe" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.TransferMedicine" >
+    select 
+    id,medicine_name AS name_medicineName,  weight_every, eat_type,price,
+    special_boil_type,weight_every, weight, money
+    from transfer_medicine
+    where bill_id=#{billId} AND hospital_code=#{hospitalCode}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from transfer_medicine
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.tangu.tcmts.po.TransferMedicine" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into transfer_medicine (medicine_name, unit, weight_every, 
+      eat_type, bill_id, medicine_code, 
+      bill_code, batch_number, price, 
+      mnemonic_code, sys_medicine_name, special_boil_type, 
+      print_medicine, weight, money, 
+      hospital_code, medicine_source, medicine_address, 
+      standard_weight, standard, factory
+      )
+    values (#{medicineName,jdbcType=VARCHAR}, #{unit,jdbcType=VARCHAR}, #{weightEvery,jdbcType=DECIMAL}, 
+      #{eatType,jdbcType=VARCHAR}, #{billId,jdbcType=BIGINT}, #{medicineCode,jdbcType=VARCHAR}, 
+      #{billCode,jdbcType=VARCHAR}, #{batchNumber,jdbcType=VARCHAR}, #{price,jdbcType=DECIMAL}, 
+      #{mnemonicCode,jdbcType=VARCHAR}, #{sysMedicineName,jdbcType=VARCHAR}, #{specialBoilType,jdbcType=VARCHAR}, 
+      #{printMedicine,jdbcType=VARCHAR}, #{weight,jdbcType=DECIMAL}, #{money,jdbcType=DECIMAL}, 
+      #{hospitalCode,jdbcType=VARCHAR}, #{medicineSource,jdbcType=VARCHAR}, #{medicineAddress,jdbcType=VARCHAR}, 
+      #{standardWeight,jdbcType=REAL}, #{standard,jdbcType=VARCHAR}, #{factory,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.tangu.tcmts.po.TransferMedicine" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into transfer_medicine
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="medicineName != null" >
+        medicine_name,
+      </if>
+      <if test="unit != null" >
+        unit,
+      </if>
+      <if test="weightEvery != null" >
+        weight_every,
+      </if>
+      <if test="eatType != null" >
+        eat_type,
+      </if>
+      <if test="billId != null" >
+        bill_id,
+      </if>
+      <if test="medicineCode != null" >
+        medicine_code,
+      </if>
+      <if test="billCode != null" >
+        bill_code,
+      </if>
+      <if test="batchNumber != null" >
+        batch_number,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="mnemonicCode != null" >
+        mnemonic_code,
+      </if>
+      <if test="sysMedicineName != null" >
+        sys_medicine_name,
+      </if>
+      <if test="specialBoilType != null" >
+        special_boil_type,
+      </if>
+      <if test="printMedicine != null" >
+        print_medicine,
+      </if>
+      <if test="weight != null" >
+        weight,
+      </if>
+      <if test="money != null" >
+        money,
+      </if>
+      <if test="hospitalCode != null" >
+        hospital_code,
+      </if>
+      <if test="medicineSource != null" >
+        medicine_source,
+      </if>
+      <if test="medicineAddress != null" >
+        medicine_address,
+      </if>
+      <if test="standardWeight != null" >
+        standard_weight,
+      </if>
+      <if test="standard != null" >
+        standard,
+      </if>
+      <if test="factory != null" >
+        factory,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="medicineName != null" >
+        #{medicineName,jdbcType=VARCHAR},
+      </if>
+      <if test="unit != null" >
+        #{unit,jdbcType=VARCHAR},
+      </if>
+      <if test="weightEvery != null" >
+        #{weightEvery,jdbcType=DECIMAL},
+      </if>
+      <if test="eatType != null" >
+        #{eatType,jdbcType=VARCHAR},
+      </if>
+      <if test="billId != null" >
+        #{billId,jdbcType=BIGINT},
+      </if>
+      <if test="medicineCode != null" >
+        #{medicineCode,jdbcType=VARCHAR},
+      </if>
+      <if test="billCode != null" >
+        #{billCode,jdbcType=VARCHAR},
+      </if>
+      <if test="batchNumber != null" >
+        #{batchNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="mnemonicCode != null" >
+        #{mnemonicCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sysMedicineName != null" >
+        #{sysMedicineName,jdbcType=VARCHAR},
+      </if>
+      <if test="specialBoilType != null" >
+        #{specialBoilType,jdbcType=VARCHAR},
+      </if>
+      <if test="printMedicine != null" >
+        #{printMedicine,jdbcType=VARCHAR},
+      </if>
+      <if test="weight != null" >
+        #{weight,jdbcType=DECIMAL},
+      </if>
+      <if test="money != null" >
+        #{money,jdbcType=DECIMAL},
+      </if>
+      <if test="hospitalCode != null" >
+        #{hospitalCode,jdbcType=VARCHAR},
+      </if>
+      <if test="medicineSource != null" >
+        #{medicineSource,jdbcType=VARCHAR},
+      </if>
+      <if test="medicineAddress != null" >
+        #{medicineAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="standardWeight != null" >
+        #{standardWeight,jdbcType=REAL},
+      </if>
+      <if test="standard != null" >
+        #{standard,jdbcType=VARCHAR},
+      </if>
+      <if test="factory != null" >
+        #{factory,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tangu.tcmts.po.TransferMedicine" >
+    update transfer_medicine
+    <set >
+      <if test="medicineName != null" >
+        medicine_name = #{medicineName,jdbcType=VARCHAR},
+      </if>
+      <if test="unit != null" >
+        unit = #{unit,jdbcType=VARCHAR},
+      </if>
+      <if test="weightEvery != null" >
+        weight_every = #{weightEvery,jdbcType=DECIMAL},
+      </if>
+      <if test="eatType != null" >
+        eat_type = #{eatType,jdbcType=VARCHAR},
+      </if>
+      <if test="billId != null" >
+        bill_id = #{billId,jdbcType=BIGINT},
+      </if>
+      <if test="medicineCode != null" >
+        medicine_code = #{medicineCode,jdbcType=VARCHAR},
+      </if>
+      <if test="billCode != null" >
+        bill_code = #{billCode,jdbcType=VARCHAR},
+      </if>
+      <if test="batchNumber != null" >
+        batch_number = #{batchNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="mnemonicCode != null" >
+        mnemonic_code = #{mnemonicCode,jdbcType=VARCHAR},
+      </if>
+      <if test="sysMedicineName != null" >
+        sys_medicine_name = #{sysMedicineName,jdbcType=VARCHAR},
+      </if>
+      <if test="specialBoilType != null" >
+        special_boil_type = #{specialBoilType,jdbcType=VARCHAR},
+      </if>
+      <if test="printMedicine != null" >
+        print_medicine = #{printMedicine,jdbcType=VARCHAR},
+      </if>
+      <if test="weight != null" >
+        weight = #{weight,jdbcType=DECIMAL},
+      </if>
+      <if test="money != null" >
+        money = #{money,jdbcType=DECIMAL},
+      </if>
+      <if test="hospitalCode != null" >
+        hospital_code = #{hospitalCode,jdbcType=VARCHAR},
+      </if>
+      <if test="medicineSource != null" >
+        medicine_source = #{medicineSource,jdbcType=VARCHAR},
+      </if>
+      <if test="medicineAddress != null" >
+        medicine_address = #{medicineAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="standardWeight != null" >
+        standard_weight = #{standardWeight,jdbcType=REAL},
+      </if>
+      <if test="standard != null" >
+        standard = #{standard,jdbcType=VARCHAR},
+      </if>
+      <if test="factory != null" >
+        factory = #{factory,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tangu.tcmts.po.TransferMedicine" >
+    update transfer_medicine
+    set medicine_name = #{medicineName,jdbcType=VARCHAR},
+      unit = #{unit,jdbcType=VARCHAR},
+      weight_every = #{weightEvery,jdbcType=DECIMAL},
+      eat_type = #{eatType,jdbcType=VARCHAR},
+      bill_id = #{billId,jdbcType=BIGINT},
+      medicine_code = #{medicineCode,jdbcType=VARCHAR},
+      bill_code = #{billCode,jdbcType=VARCHAR},
+      batch_number = #{batchNumber,jdbcType=VARCHAR},
+      price = #{price,jdbcType=DECIMAL},
+      mnemonic_code = #{mnemonicCode,jdbcType=VARCHAR},
+      sys_medicine_name = #{sysMedicineName,jdbcType=VARCHAR},
+      special_boil_type = #{specialBoilType,jdbcType=VARCHAR},
+      print_medicine = #{printMedicine,jdbcType=VARCHAR},
+      weight = #{weight,jdbcType=DECIMAL},
+      money = #{money,jdbcType=DECIMAL},
+      hospital_code = #{hospitalCode,jdbcType=VARCHAR},
+      medicine_source = #{medicineSource,jdbcType=VARCHAR},
+      medicine_address = #{medicineAddress,jdbcType=VARCHAR},
+      standard_weight = #{standardWeight,jdbcType=REAL},
+      standard = #{standard,jdbcType=VARCHAR},
+      factory = #{factory,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <select id="findMedicineListByBillIds" parameterType="java.util.List" resultType="com.tangu.tcmts.po.RecipeMedicine">
+	SELECT 
+	id as transfer_medicine_id,medicine_name,weight_every,bill_id,medicine_code,
+	special_boil_type,money,hospital_code,standard_weight 
+	FROM transfer_medicine
+	WHERE 
+	transfer_medicine.bill_id in
+	(
+	<foreach collection="list" item="item" index="index" separator=",">
+    	#{item.billId}
+    </foreach>
+    )
+	ORDER BY id,bill_id,hospital_code ASC
+  </select>
+  <insert id="insertTransferMedicine" parameterType="java.util.List">
+  	INSERT INTO transfer_medicine (
+	  	medicine_name, weight_every,bill_id,mnemonic_code,
+		unit,special_boil_type,hospital_code,
+		money,price,standard_weight,medicine_source)
+	values
+	<foreach collection="list" item="item" index="index" separator=",">
+    	(
+    		#{item.medicineName},#{item.weightEvery},#{item.billId},#{item.mnemonicCode},
+    		#{item.unit},#{item.specialBoilType},#{item.hospitalCode},
+    		#{item.money},#{item.price},#{item.standardWeight},#{item.medicineSource}
+    	)
+    </foreach>
+  </insert>
+  <select id="listTransferMedicineById" parameterType="java.util.List" resultType="com.tangu.tcmts.po.RecipeMedicine">
+  	SELECT tm.* FROM `transfer_recipe` tr , `transfer_medicine` tm
+	WHERE tr.`bill_id` = tm.`bill_id` AND tr.`hospital_code` = tm.`hospital_code`
+	AND tr.`id` in
+	<foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+		#{item.id}
+	</foreach>
+  </select>
+  
+  
+  <select id="listTrMedicineToRpMedicine" resultType="com.tangu.tcmts.po.RecipeMedicine" parameterType="com.tangu.tcmts.po.TransferMedicine" >
+   	select 
+    id,medicine_name,  weight_every, eat_type,price,
+    special_boil_type,weight_every, weight, money
+    from transfer_medicine
+    where bill_id=#{billId} AND hospital_code=#{hospitalCode}
+  </select>
+</mapper>

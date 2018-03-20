@@ -1,0 +1,956 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.TransferRecipeMapper">
+    <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.TransferRecipeDO">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="trade_time" property="tradeTime" jdbcType="TIMESTAMP"/>
+        <result column="receive_time" property="receiveTime" jdbcType="TIMESTAMP"/>
+        <result column="if_receive" property="ifReceive" jdbcType="INTEGER"/>
+        <result column="bill_id" property="billId" jdbcType="BIGINT"/>
+        <result column="recipe_code" property="recipeCode" jdbcType="VARCHAR"/>
+        <result column="recipe_serial" property="recipeSerial" jdbcType="VARCHAR"/>
+        <result column="recipe_bh" property="recipeBh" jdbcType="VARCHAR"/>
+        <result column="carry_id" property="carryId" jdbcType="INTEGER"/>
+        <result column="hospital_code" property="hospitalCode" jdbcType="VARCHAR"/>
+        <result column="part_hospital_code" property="partHospitalCode" jdbcType="VARCHAR"/>
+        <result column="boil_type" property="boilType" jdbcType="INTEGER"/>
+        <result column="outpatient_num" property="outpatientNum" jdbcType="VARCHAR"/>
+        <result column="recipient_code" property="recipientCode" jdbcType="VARCHAR"/>
+        <result column="recipient_name" property="recipientName" jdbcType="VARCHAR"/>
+        <result column="sex" property="sex" jdbcType="VARCHAR"/>
+        <result column="age" property="age" jdbcType="VARCHAR"/>
+        <result column="recipient_tel" property="recipientTel" jdbcType="VARCHAR"/>
+        <result column="consignee" property="consignee" jdbcType="VARCHAR"/>
+        <result column="consignee_tel" property="consigneeTel" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="region" property="region" jdbcType="VARCHAR"/>
+        <result column="recipient_address" property="recipientAddress" jdbcType="VARCHAR"/>
+        <result column="doctor_name" property="doctorName" jdbcType="VARCHAR"/>
+        <result column="doctor_code" property="doctorCode" jdbcType="VARCHAR"/>
+        <result column="quantity" property="quantity" jdbcType="INTEGER"/>
+        <result column="package_paste" property="packagePaste" jdbcType="INTEGER"/>
+        <result column="total_package_paste" property="totalPackagePaste" jdbcType="INTEGER"/>
+        <result column="medicine_quantity" property="medicineQuantity" jdbcType="INTEGER"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="print_state" property="printState" jdbcType="INTEGER"/>
+        <result column="money" property="money" jdbcType="DECIMAL"/>
+        <result column="his_hospital" property="hisHospital" jdbcType="VARCHAR"/>
+        <result column="native_recipe_id" property="nativeRecipeId" jdbcType="INTEGER"/>
+        <result column="inpatient_area" property="inpatientArea" jdbcType="VARCHAR"/>
+        <result column="bed_number" property="bedNumber" jdbcType="VARCHAR"/>
+        <result column="total_weight" property="totalWeight" jdbcType="DECIMAL"/>
+        <result column="recipe_type" property="recipeType" jdbcType="VARCHAR"/>
+        <result column="department" property="department" jdbcType="VARCHAR"/>
+        <result column="pathogen" property="pathogen" jdbcType="VARCHAR"/>
+        <result column="cal_type" property="calType" jdbcType="VARCHAR"/>
+        <result column="usage" property="usage" jdbcType="VARCHAR"/>
+        <result column="pack_type" property="packType" jdbcType="INTEGER"/>
+        <result column="use_his_money" property="useHisMoney" jdbcType="BIT"/>
+        <result column="recipe_source" property="recipeSource" jdbcType="INTEGER"/>
+        <result column="express_site" property="expressSite" jdbcType="VARCHAR"/>
+        <result column="process_cost" property="processCost" jdbcType="DECIMAL"/>
+        <result column="belong" property="belong" jdbcType="INTEGER"/>
+    </resultMap>
+    <select id="getTransferRecipeContent" resultType="com.tangu.tcmts.po.TransferRecipeDO"
+            parameterType="java.lang.Integer">
+        SELECT
+        tr.*,
+        h.hospital_nickname AS hospital_name,h.id AS hospital_id,h.settle_company_id
+        FROM transfer_recipe tr
+        LEFT JOIN hospital h ON tr.hospital_code=h.hospital_code
+        LEFT JOIN sys_lookup slu ON tr.boil_type = slu.value AND slu.code='boilType'
+        WHERE tr.id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="listTransferRecipes" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.TransferRecipeDTO">
+        SELECT
+<!--         tr.id,recipe_code,recipe_serial,receive_time,trade_time,tr.hospital_code,recipient_name, -->
+		tr.*,
+        sl.label AS boil_type_name,
+        carry.label AS transferType,
+        h.hospital_company AS hospital_name
+        FROM transfer_recipe tr 
+        inner JOIN hospital h ON tr.hospital_code=h.hospital_code
+        LEFT JOIN sys_lookup sl ON tr.`boil_type`=sl.value AND sl.code='boilType'
+        LEFT JOIN sys_lookup carry ON tr.`carry_id`=carry.value AND carry.code='transferType'
+        <where>
+            <if test="id != null">
+                AND tr.id=#{id}
+            </if>
+            <if test="orderType ==null and startDate != null and endDate != null">
+                AND download_date BETWEEN #{startDate} AND #{endDate}
+            </if>
+            <if test="orderType !=null and orderType == 0 and startDate != null and endDate != null">
+                AND trade_time BETWEEN #{startDate} AND #{endDate}
+            </if>
+            <if test="hospitalCode != null and hospitalCode != '' ">
+                AND tr.hospital_code LIKE CONCAT('%',#{hospitalCode},'%')
+            </if>
+            <if test="hospitalCodeValue != null and hospitalCodeValue != ''">
+                AND tr.hospital_code = #{hospitalCodeValue}
+            </if>
+            <if test="recipientName != null and recipientName != '' ">
+                AND recipient_name like CONCAT('%', #{recipientName},'%')
+            </if>
+            <if test="recipeCode != null and recipeCode != '' ">
+                AND recipe_code like CONCAT('%', #{recipeCode},'%')
+            </if>
+            <if test="ifReceive != null">
+                AND if_receive= #{ifReceive}
+            </if>
+            <if test="ifReceive == null">
+               AND if_receive != 999
+            </if>
+            <if test="boilType != null">
+                AND boil_type = #{boilType}
+            </if>
+            <if test="printState != null">
+                AND print_state = #{printState}
+            </if>
+            <if test="inpatientArea != null and inpatientArea != ''">
+                AND inpatient_area LIKE CONCAT('%', #{inpatientArea},'%')
+            </if>
+            <if test="recipeSerial != null and recipeSerial != ''">
+                AND recipe_serial LIKE CONCAT('%', #{recipeSerial},'%')
+            </if>
+            <if test="expressSite != null and expressSite != ''">
+                AND express_site LIKE CONCAT('%', #{expressSite},'%')
+            </if>
+            <if test="carryId != null">
+                AND carry_id = #{carryId}
+            </if>
+            <if test="outpatientNum != null and outpatientNum != '' ">
+            	and tr.outpatient_num = #{outpatientNum}
+            </if>
+            <if test="belong != null ">
+            	and tr.belong = #{belong}
+            </if>
+            <if test="invoiceCode != null and invoiceCode != '' ">
+            	and tr.invoice_code = #{invoiceCode}
+            </if>
+            <if test="medicineMatch != null">
+            	and tr.medicine_match = #{medicineMatch}
+            </if>
+        </where>
+        ORDER BY tr.trade_time
+    </select>
+
+    <insert id="insertSelective" parameterType="com.tangu.tcmts.po.TransferRecipeDO">
+        <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into transfer_recipe
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="tradeTime != null">
+                trade_time,
+            </if>
+            <if test="receiveTime != null">
+                receive_time,
+            </if>
+            <if test="ifReceive != null">
+                if_receive,
+            </if>
+            <if test="billId != null">
+                bill_id,
+            </if>
+            <if test="recipeCode != null">
+                recipe_code,
+            </if>
+            <if test="recipeSerial != null">
+                recipe_serial,
+            </if>
+            <if test="recipeBh != null">
+                recipe_bh,
+            </if>
+            <if test="carryId != null">
+                carry_id,
+            </if>
+            <if test="hospitalCode != null">
+                hospital_code,
+            </if>
+            <if test="partHospitalCode != null">
+                part_hospital_code,
+            </if>
+            <if test="boilType != null">
+                boil_type,
+            </if>
+            <if test="outpatientNum != null">
+                outpatient_num,
+            </if>
+            <if test="recipientCode != null">
+                recipient_code,
+            </if>
+            <if test="recipientName != null">
+                recipient_name,
+            </if>
+            <if test="sex != null">
+                sex,
+            </if>
+            <if test="age != null">
+                age,
+            </if>
+            <if test="recipientTel != null">
+                recipient_tel,
+            </if>
+            <if test="consignee != null">
+                consignee,
+            </if>
+            <if test="consigneeTel != null">
+                consignee_tel,
+            </if>
+            <if test="province != null">
+                province,
+            </if>
+            <if test="city != null">
+                city,
+            </if>
+            <if test="region != null">
+                region,
+            </if>
+            <if test="recipientAddress != null">
+                recipient_address,
+            </if>
+            <if test="doctorName != null">
+                doctor_name,
+            </if>
+            <if test="doctorCode != null">
+                doctor_code,
+            </if>
+            <if test="quantity != null">
+                quantity,
+            </if>
+            <if test="packagePaste != null">
+                package_paste,
+            </if>
+            <if test="totalPackagePaste != null">
+                total_package_paste,
+            </if>
+            <if test="medicineQuantity != null">
+                medicine_quantity,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="printState != null">
+                print_state,
+            </if>
+            <if test="money != null">
+                money,
+            </if>
+            <if test="hisHospital != null">
+                his_hospital,
+            </if>
+            <if test="nativeRecipeId != null">
+                native_recipe_id,
+            </if>
+            <if test="inpatientArea != null">
+                inpatient_area,
+            </if>
+            <if test="bedNumber != null">
+                bed_number,
+            </if>
+            <if test="totalWeight != null">
+                total_weight,
+            </if>
+            <if test="recipeType != null">
+                recipe_type,
+            </if>
+            <if test="department != null">
+                department,
+            </if>
+            <if test="pathogen != null">
+                pathogen,
+            </if>
+            <if test="calType != null">
+                cal_type,
+            </if>
+            <if test="usage != null">
+                usage,
+            </if>
+            <if test="packType != null">
+                pack_type,
+            </if>
+            <if test="useHisMoney != null">
+                use_his_money,
+            </if>
+            <if test="recipeSource != null">
+                recipe_source,
+            </if>
+            <if test="expressSite != null">
+                express_site,
+            </if>
+            <if test="processCost != null">
+                process_cost,
+            </if>
+            <if test="belong != null">
+                belong,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="tradeTime != null">
+                #{tradeTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="receiveTime != null">
+                #{receiveTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ifReceive != null">
+                #{ifReceive,jdbcType=INTEGER},
+            </if>
+            <if test="billId != null">
+                #{billId,jdbcType=BIGINT},
+            </if>
+            <if test="recipeCode != null">
+                #{recipeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="recipeSerial != null">
+                #{recipeSerial,jdbcType=VARCHAR},
+            </if>
+            <if test="recipeBh != null">
+                #{recipeBh,jdbcType=VARCHAR},
+            </if>
+            <if test="carryId != null">
+                #{carryId,jdbcType=INTEGER},
+            </if>
+            <if test="hospitalCode != null">
+                #{hospitalCode,jdbcType=VARCHAR},
+            </if>
+            <if test="partHospitalCode != null">
+                #{partHospitalCode,jdbcType=VARCHAR},
+            </if>
+            <if test="boilType != null">
+                #{boilType,jdbcType=INTEGER},
+            </if>
+            <if test="outpatientNum != null">
+                #{outpatientNum,jdbcType=VARCHAR},
+            </if>
+            <if test="recipientCode != null">
+                #{recipientCode,jdbcType=VARCHAR},
+            </if>
+            <if test="recipientName != null">
+                #{recipientName,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                #{sex,jdbcType=VARCHAR},
+            </if>
+            <if test="age != null">
+                #{age,jdbcType=VARCHAR},
+            </if>
+            <if test="recipientTel != null">
+                #{recipientTel,jdbcType=VARCHAR},
+            </if>
+            <if test="consignee != null">
+                #{consignee,jdbcType=VARCHAR},
+            </if>
+            <if test="consigneeTel != null">
+                #{consigneeTel,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null">
+                #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null">
+                #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="region != null">
+                #{region,jdbcType=VARCHAR},
+            </if>
+            <if test="recipientAddress != null">
+                #{recipientAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="doctorName != null">
+                #{doctorName,jdbcType=VARCHAR},
+            </if>
+            <if test="doctorCode != null">
+                #{doctorCode,jdbcType=VARCHAR},
+            </if>
+            <if test="quantity != null">
+                #{quantity,jdbcType=INTEGER},
+            </if>
+            <if test="packagePaste != null">
+                #{packagePaste,jdbcType=INTEGER},
+            </if>
+            <if test="totalPackagePaste != null">
+                #{totalPackagePaste,jdbcType=INTEGER},
+            </if>
+            <if test="medicineQuantity != null">
+                #{medicineQuantity,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="printState != null">
+                #{printState,jdbcType=INTEGER},
+            </if>
+            <if test="money != null">
+                #{money,jdbcType=DECIMAL},
+            </if>
+            <if test="hisHospital != null">
+                #{hisHospital,jdbcType=VARCHAR},
+            </if>
+            <if test="nativeRecipeId != null">
+                #{nativeRecipeId,jdbcType=INTEGER},
+            </if>
+            <if test="inpatientArea != null">
+                #{inpatientArea,jdbcType=VARCHAR},
+            </if>
+            <if test="bedNumber != null">
+                #{bedNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="totalWeight != null">
+                #{totalWeight,jdbcType=DECIMAL},
+            </if>
+            <if test="recipeType != null">
+                #{recipeType,jdbcType=VARCHAR},
+            </if>
+            <if test="department != null">
+                #{department,jdbcType=VARCHAR},
+            </if>
+            <if test="pathogen != null">
+                #{pathogen,jdbcType=VARCHAR},
+            </if>
+            <if test="calType != null">
+                #{calType,jdbcType=VARCHAR},
+            </if>
+            <if test="usage != null">
+                #{usage,jdbcType=VARCHAR},
+            </if>
+            <if test="packType != null">
+                #{packType,jdbcType=INTEGER},
+            </if>
+            <if test="useHisMoney != null">
+                #{useHisMoney,jdbcType=BIT},
+            </if>
+            <if test="recipeSource != null">
+                #{recipeSource,jdbcType=INTEGER},
+            </if>
+            <if test="expressSite != null">
+                #{expressSite,jdbcType=VARCHAR},
+            </if>
+            <if test="processCost != null">
+                #{processCost,jdbcType=DECIMAL},
+            </if>
+            <if test="belong != null">
+                #{belong,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tangu.tcmts.po.TransferRecipeDO">
+        update transfer_recipe
+        <set>
+            <if test="tradeTime != null">
+                trade_time = #{tradeTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="receiveTime != null">
+                receive_time = #{receiveTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ifReceive != null">
+                if_receive = #{ifReceive,jdbcType=INTEGER},
+            </if>
+            <if test="billId != null">
+                bill_id = #{billId,jdbcType=BIGINT},
+            </if>
+            <if test="recipeCode != null">
+                recipe_code = #{recipeCode,jdbcType=VARCHAR},
+            </if>
+            <if test="recipeSerial != null">
+                recipe_serial = #{recipeSerial,jdbcType=VARCHAR},
+            </if>
+            <if test="recipeBh != null">
+                recipe_bh = #{recipeBh,jdbcType=VARCHAR},
+            </if>
+            <if test="carryId != null">
+                carry_id = #{carryId,jdbcType=INTEGER},
+            </if>
+            <if test="hospitalCode != null">
+                hospital_code = #{hospitalCode,jdbcType=VARCHAR},
+            </if>
+            <if test="partHospitalCode != null">
+                part_hospital_code = #{partHospitalCode,jdbcType=VARCHAR},
+            </if>
+            <if test="boilType != null">
+                boil_type = #{boilType,jdbcType=INTEGER},
+            </if>
+            <if test="outpatientNum != null">
+                outpatient_num = #{outpatientNum,jdbcType=VARCHAR},
+            </if>
+            <if test="recipientCode != null">
+                recipient_code = #{recipientCode,jdbcType=VARCHAR},
+            </if>
+            <if test="recipientName != null">
+                recipient_name = #{recipientName,jdbcType=VARCHAR},
+            </if>
+            <if test="sex != null">
+                sex = #{sex,jdbcType=VARCHAR},
+            </if>
+            <if test="age != null">
+                age = #{age,jdbcType=VARCHAR},
+            </if>
+            <if test="recipientTel != null">
+                recipient_tel = #{recipientTel,jdbcType=VARCHAR},
+            </if>
+            <if test="consignee != null">
+                consignee = #{consignee,jdbcType=VARCHAR},
+            </if>
+            <if test="consigneeTel != null">
+                consignee_tel = #{consigneeTel,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null">
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null">
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="region != null">
+                region = #{region,jdbcType=VARCHAR},
+            </if>
+            <if test="recipientAddress != null">
+                recipient_address = #{recipientAddress,jdbcType=VARCHAR},
+            </if>
+            <if test="doctorName != null">
+                doctor_name = #{doctorName,jdbcType=VARCHAR},
+            </if>
+            <if test="doctorCode != null">
+                doctor_code = #{doctorCode,jdbcType=VARCHAR},
+            </if>
+            <if test="quantity != null">
+                quantity = #{quantity,jdbcType=INTEGER},
+            </if>
+            <if test="packagePaste != null">
+                package_paste = #{packagePaste,jdbcType=INTEGER},
+            </if>
+            <if test="totalPackagePaste != null">
+                total_package_paste = #{totalPackagePaste,jdbcType=INTEGER},
+            </if>
+            <if test="medicineQuantity != null">
+                medicine_quantity = #{medicineQuantity,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="printState != null">
+                print_state = #{printState,jdbcType=INTEGER},
+            </if>
+            <if test="money != null">
+                money = #{money,jdbcType=DECIMAL},
+            </if>
+            <if test="hisHospital != null">
+                his_hospital = #{hisHospital,jdbcType=VARCHAR},
+            </if>
+            <if test="nativeRecipeId != null">
+                native_recipe_id = #{nativeRecipeId,jdbcType=INTEGER},
+            </if>
+            <if test="inpatientArea != null">
+                inpatient_area = #{inpatientArea,jdbcType=VARCHAR},
+            </if>
+            <if test="bedNumber != null">
+                bed_number = #{bedNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="totalWeight != null">
+                total_weight = #{totalWeight,jdbcType=DECIMAL},
+            </if>
+            <if test="recipeType != null">
+                recipe_type = #{recipeType,jdbcType=VARCHAR},
+            </if>
+            <if test="department != null">
+                department = #{department,jdbcType=VARCHAR},
+            </if>
+            <if test="pathogen != null">
+                pathogen = #{pathogen,jdbcType=VARCHAR},
+            </if>
+            <if test="calType != null">
+                cal_type = #{calType,jdbcType=VARCHAR},
+            </if>
+            <if test="usage != null">
+                usage = #{usage,jdbcType=VARCHAR},
+            </if>
+            <if test="packType != null">
+                pack_type = #{packType,jdbcType=INTEGER},
+            </if>
+            <if test="useHisMoney != null">
+                use_his_money = #{useHisMoney,jdbcType=BIT},
+            </if>
+            <if test="recipeSource != null">
+                recipe_source = #{recipeSource,jdbcType=INTEGER},
+            </if>
+            <if test="expressSite != null">
+                express_site = #{expressSite,jdbcType=VARCHAR},
+            </if>
+            <if test="processCost != null">
+                process_cost = #{processCost,jdbcType=DECIMAL},
+            </if>
+            <if test="belong != null">
+                belong = #{belong,jdbcType=INTEGER},
+            </if>
+            <if test="medicineMatch != null">
+                medicine_match = #{medicineMatch},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    <update id="updateUseState" parameterType="com.tangu.tcmts.po.TransferRecipeDO">
+        UPDATE transfer_recipe
+        SET if_receive = #{ifReceive}
+        <if test="receiveTime != null" >
+        	,receive_time=#{receiveTime}
+        </if>
+        <if test="nativeRecipeId != null">
+        	,native_recipe_id=#{nativeRecipeId}
+        </if>
+        WHERE id = #{id}
+    </update>
+    
+    <update id="updateUseStateByIds" parameterType="java.util.List">
+	    <foreach collection="list" item="item" index="index" separator=";">
+	    	UPDATE transfer_recipe
+	        SET if_receive = 1,receive_time=now(),native_recipe_id=#{item.nativeRecipeId}
+	        WHERE id = #{item.id}
+	    </foreach>
+    </update>
+    <update id="updateTransferRecipePrintState" parameterType="java.util.List">
+        <foreach collection="list" index="index" item="item" separator=";">
+            UPDATE transfer_recipe
+            SET print_state = 1
+            WHERE id = #{item}
+        </foreach>
+    </update>
+    <select id="checkTransferRecipe" resultType="com.tangu.tcmts.po.RecipeDO"
+            parameterType="java.lang.Integer">
+    SELECT
+    h.hospital_company AS hospital_name,h.id AS hospital_id,
+    h.settle_company_id,sc.price_type_id,sc.discount,tr.use_his_money,
+    tr.trade_time as deal_date,tr.recipe_source
+    FROM 
+    transfer_recipe tr,hospital h,settle_company sc
+    WHERE tr.id = #{id,jdbcType=INTEGER}
+    and h.settle_company_id=sc.id
+    and tr.hospital_code=h.hospital_code
+    and if_receive=0
+  </select>
+  
+  
+  <resultMap id="RcipeResultMap" type="com.tangu.tcmts.po.RecipeDO">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="trade_time" property="dealDate" jdbcType="TIMESTAMP"/>
+        <result column="bill_id" property="billId" jdbcType="BIGINT"/>
+        <result column="recipe_code" property="recipeCode" jdbcType="VARCHAR"/>
+        <result column="recipe_serial" property="recipeSerial" jdbcType="VARCHAR"/>
+        <result column="recipe_bh" property="recipeBh" jdbcType="VARCHAR"/>
+        <result column="carry_id" property="carryId" jdbcType="INTEGER"/>
+        <result column="hospital_code" property="hospitalCode" jdbcType="VARCHAR"/>
+        <result column="boil_type" property="boilType" jdbcType="INTEGER"/>
+        <result column="recipient_name" property="recipientName" jdbcType="VARCHAR"/>
+        <result column="sex" property="sex" jdbcType="VARCHAR"/>
+        <result column="age" property="age" jdbcType="VARCHAR"/>
+        <result column="recipient_tel" property="recipientTel" jdbcType="VARCHAR"/>
+        <result column="consignee" property="consignee" jdbcType="VARCHAR"/>
+        <result column="consignee_tel" property="consigneeTel" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="region" property="region" jdbcType="VARCHAR"/>
+        <result column="recipient_address" property="recipientAddress" jdbcType="VARCHAR"/>
+        <result column="doctor_name" property="doctorName" jdbcType="VARCHAR"/>
+        <result column="quantity" property="quantity" jdbcType="INTEGER"/>
+        <result column="package_paste" property="packagePaste" jdbcType="INTEGER"/>
+        <result column="total_package_paste" property="totalPackagePaste" jdbcType="INTEGER"/>
+        <result column="medicine_quantity" property="medicineQuantity" jdbcType="INTEGER"/>
+        <result column="remark" property="remark" jdbcType="VARCHAR"/>
+        <result column="print_state" property="printState" jdbcType="INTEGER"/>
+        <result column="money" property="money" jdbcType="DECIMAL"/>
+        <result column="inpatient_area" property="inpatientArea" jdbcType="VARCHAR"/>
+        <result column="bed_number" property="bedNumber" jdbcType="VARCHAR"/>
+        <result column="total_weight" property="totalWeight" jdbcType="DECIMAL"/>
+        <result column="department" property="department" jdbcType="VARCHAR"/>
+        <result column="pathogen" property="pathogen" jdbcType="VARCHAR"/>
+        <result column="usage" property="usage" jdbcType="VARCHAR"/>
+        <result column="pack_type" property="packType" jdbcType="INTEGER"/>
+        <result column="use_his_money" property="useHisMoney" jdbcType="BIT"/>
+        <result column="recipe_source" property="recipeSource" jdbcType="INTEGER"/>
+        <result column="express_site" property="expressSite" jdbcType="VARCHAR"/>
+        <result column="process_cost" property="processCost" jdbcType="DECIMAL"/>
+        <result column="belong" property="belong" jdbcType="INTEGER"/>
+    </resultMap>
+  <select id="listReceiveTransferRecipe" parameterType="java.util.List" resultMap="RcipeResultMap">
+    SELECT
+    tr.*,
+    h.id AS hospital_id,h.settle_company_id,h.hospital_nickname as hospital_name,
+    sc.price_type_id,sc.discount
+    FROM 
+    transfer_recipe tr,hospital h,settle_company sc
+    WHERE tr.id in(
+    <foreach collection="list" item="item" index="index" separator=",">
+    	#{item.id}
+    </foreach>
+    )
+    and h.settle_company_id=sc.id
+    and tr.hospital_code=h.hospital_code
+    and if_receive=0
+  </select>
+   <select id="listReceiveTransferRecipes" parameterType="java.util.List" resultMap="RcipeResultMap">
+    SELECT
+    tr.*,
+    h.id AS hospital_id,h.settle_company_id,h.hospital_nickname AS hospital_name,
+    sc.price_type_id,sc.discount,trt.carry_id AS tmpCarryId,trt.take_time,trt.receive_remark,trt.logistics_code AS tmpLogisicsCode
+    FROM 
+    transfer_recipe tr
+    INNER JOIN hospital h ON tr.hospital_code=h.hospital_code 
+    INNER JOIN settle_company sc ON h.settle_company_id=sc.id
+    LEFT JOIN `transfer_recipe_tmp` trt ON trt.transfer_recipe_id = tr.id
+    where  tr.id in(
+    <foreach collection="list" item="item" index="index" separator=",">
+    	#{item.id}
+    </foreach>
+    )
+    
+  </select>
+  <insert id="insertTranferRecipe" parameterType="java.util.List">
+  	INSERT INTO transfer_recipe (
+	  	boil_type,trade_time,quantity,recipe_code,
+	  	hospital_code,inpatient_area,bed_number,
+		recipient_name,bill_id,total_weight,recipient_tel
+		,recipient_address,region,remark,
+		carry_id,recipe_serial,pack_type,recipe_bh,
+		`usage`,province,city,packing_name,doctor_name,download_date,recipe_source
+		,department,package_paste,medicine_quantity,money,belong,total_package_paste
+		)
+	values
+	<foreach collection="list" item="item" index="index" separator=",">
+		(
+		#{item.boilType},#{item.tradeTime},#{item.quantity},#{item.recipeCode},
+		#{item.hospitalCode},#{item.inpatientArea},#{item.bedNumber},
+		#{item.recipientName},#{item.billId},#{item.totalWeight},#{item.recipientTel},
+		#{item.recipientAddress},#{item.region},#{item.remark},
+		#{item.carryId},#{item.recipeSerial},#{item.packType},#{item.recipeBh},
+		#{item.usage},#{item.province},#{item.city},#{item.packingName},#{item.doctorName},NOW(),2
+		,#{item.department},#{item.packagePaste},#{item.medicineQuantity},#{item.money},#{item.belong}
+		,#{item.totalPackagePaste}
+		)
+	</foreach>
+  </insert>
+    <select id = "listTransferRecipe" parameterType="com.tangu.tcmts.po.TransferRecipeDTO" resultType="com.tangu.tcmts.po.TransferRecipeDO">
+             SELECT tr.`id`,tr.invoice_code,tr.recipient_tel,tr.outpatient_num,tr.if_receive,
+               r.take_time,r.`carry_id`,r.`logistics_code`,r.receive_remark,tr.trade_time,tr.receive_time,tr.recipient_name
+               FROM `transfer_recipe` tr
+               LEFT JOIN recipe r ON r.`id` = tr.`native_recipe_id`
+               <where>
+                       tr.belong = 1
+                       <if test="startDate != null">
+                               AND DATE_FORMAT(tr.trade_time,'%Y-%m-%d') 
+                               BETWEEN DATE_FORMAT(#{startDate},'%Y-%m-%d')
+                               AND DATE_FORMAT(#{endDate},'%Y-%m-%d')
+                       </if>
+                       <if test="ifReceive != null ">
+                               AND tr.if_receive = #{ifReceive}
+                       </if>
+                       <if test="ifReceive == null">
+			               	AND if_receive != 999
+			           </if>
+                       <if test="invoiceCode != null and invoiceCode != '' ">
+                               AND tr.invoice_code = #{invoiceCode}
+                       </if>
+                       <if test="recipientName != null and recipientName != '' ">
+                               AND tr.recipient_name = #{recipientName}
+                       </if>
+                       <if test="outpatientNum != null and outpatientNum != '' ">
+                               AND tr.outpatient_num = #{outpatientNum}
+                       </if>
+               </where>
+  </select>
+  
+  <update id="updateMedicineMatch" parameterType="java.util.List">
+  		UPDATE `transfer_recipe` SET medicine_match = 1
+		WHERE id IN 
+		<foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+			#{item.id}
+		</foreach>
+  </update>
+  
+  <select id = "listTransferRecipeByInvoiceCode" parameterType="java.lang.String" resultType="com.tangu.tcmts.po.TransferRecipeDO">
+     SELECT tr.`id`,tr.invoice_code,tr.recipient_name,tr.outpatient_num,
+     tr.trade_time,tr.native_recipe_id,tr.bill_id,r.shipping_state,
+     tr.if_receive,
+       (CASE WHEN IFNULL(tr.medicine_match,0)=0 THEN trt.take_time ELSE r.take_time END)AS take_time,	
+       (CASE WHEN IFNULL(tr.medicine_match,0)=0 THEN trt.logistics_code ELSE r.logistics_code END)AS logistics_code,	
+       (CASE WHEN IFNULL(tr.medicine_match,0)=0 THEN trt.receive_remark ELSE r.receive_remark END)AS receive_remark,
+       (CASE WHEN IFNULL(tr.medicine_match,0)=0 THEN trt.carry_id ELSE r.carry_id END)AS carry_id
+       FROM `transfer_recipe` tr
+       LEFT JOIN recipe r ON tr.`native_recipe_id` = r.`id`
+       LEFT JOIN transfer_recipe_tmp trt ON tr.`id` = trt.`transfer_recipe_id`
+       WHERE
+           tr.belong = 1 
+           AND tr.invoice_code like CONCAT('%',#{invoiceCode}) 
+  </select>
+  
+  <select id = "listReciveRecipeList" resultType="com.tangu.tcmts.po.TransferRecipeDO">
+     SELECT tr.`id`,tr.invoice_code,tr.recipient_tel,tr.outpatient_num,
+	     IFNULL(if_receive,0) as if_receive,
+		(CASE IFNULL(tr.medicine_match,0) 
+			WHEN 0 THEN trt.receive_remark
+			ELSE r.receive_remark
+			END
+		) receive_remark,
+		(CASE IFNULL(tr.medicine_match,0)
+			WHEN 0 THEN trt.carry_id
+			ELSE r.carry_id
+			END
+		) carry_id,
+		(CASE IFNULL(tr.medicine_match,0)
+			WHEN 0 THEN trt.take_time
+			ELSE r.take_time
+			END
+		) take_time,
+		(CASE IFNULL(tr.medicine_match,0)
+			WHEN 0 THEN trt.logistics_code
+			ELSE r.logistics_code
+			END
+		) logistics_code,tr.trade_time,tr.receive_time,tr.recipient_name
+     FROM `transfer_recipe` tr
+	 LEFT JOIN transfer_recipe_tmp trt ON trt.transfer_recipe_id = tr.id
+     LEFT JOIN recipe r ON r.id = tr.native_recipe_id
+     <where>
+        <if test="belong != null">
+           AND	tr.belong = #{belong}
+        </if>
+ 	    <if test="startDate != null">
+           AND DATE_FORMAT(tr.trade_time,'%Y-%m-%d') 
+           BETWEEN DATE_FORMAT(#{startDate},'%Y-%m-%d')
+           AND DATE_FORMAT(#{endDate},'%Y-%m-%d')
+        </if>
+        <if test="ifReceive != null ">
+           AND tr.if_receive = #{ifReceive}
+        </if>
+        <if test="ifReceive == null">
+           AND if_receive != 999
+        </if>
+        <if test="invoiceCode != null and invoiceCode != '' ">
+           AND tr.invoice_code = #{invoiceCode}
+        </if>
+        <if test="recipientName != null and recipientName != '' ">
+           AND tr.recipient_name = #{recipientName}
+        </if>
+        <if test="outpatientNum != null and outpatientNum != '' ">
+           AND tr.outpatient_num = #{outpatientNum}
+        </if>
+        <if test="carryId != null">
+           AND trt.carry_id = #{carryId}
+        </if>
+     </where>
+      ORDER BY tr.trade_time
+  </select>
+  <insert id="insertTransferRecipeTmp" parameterType="java.util.List" >
+  	REPLACE INTO `transfer_recipe_tmp`(transfer_recipe_id,carry_id,take_time,receive_remark,receiver_id,logistics_code)
+	VALUES
+	<foreach collection="list" item="item" index="index" separator=",">
+		(#{item.id},#{item.carryId},#{item.takeTime},#{item.receiveRemark},#{item.receiverId},#{item.logisticsCode})
+	</foreach>
+  </insert>
+  <update id="updateMedicineMatchById" parameterType="java.util.List">
+  	<!--<foreach collection="list" item="item" index="index" separator=";">
+  		 set medicine_match = #{item.medicineMatch} , if_receive = #{item.ifReceive}
+  		where id = #{item.id}
+  	</foreach>-->
+  	<!--update transfer_recipe
+    <trim prefix="set" suffixOverrides=",">
+	  medicine_match =
+	  case id
+	    <foreach collection="list" item="item" index="index">
+	      when #{item.id} then #{item.medicineMatch}
+	    </foreach>
+	  end,
+	  if_receive =
+	  case id
+	    <foreach collection="list" item="item" index="index">
+	      when #{item.id} then #{item.ifReceive}
+	    </foreach>
+	  end
+	</trim>
+	where id in
+	<foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+	    #{item.id,jdbcType=BIGINT}
+	</foreach>
+	-->
+	<foreach collection="list" item="item" index="index" separator=";">
+  		 UPDATE transfer_recipe SET medicine_match = #{item.medicineMatch} , if_receive = #{item.ifReceive}
+  		 WHERE id = #{item.id}
+  	</foreach>
+  </update>
+
+    <select id="listReceiveRecipeList" parameterType="com.tangu.tcmts.po.TransferRecipeDTO" resultType="com.tangu.tcmts.po.ReceiveRecipeListVO">
+        SELECT tr.`id`,tr.recipient_tel,
+        IFNULL(if_receive,0) as if_receive,
+        IFNULL(is_urgent,0) as ifUrgent,
+        (CASE IFNULL(if_receive,0)
+        WHEN 0 THEN tr.recipe_code
+        ELSE r.sys_recipe_code
+        END
+        ) recipe_code,
+        (CASE IFNULL(if_receive,0)
+        WHEN 0 THEN tr.boil_type
+        ELSE r.boil_type
+        END
+        ) boil_type,
+        (CASE IFNULL(if_receive,0)
+        WHEN 0 THEN tr.quantity
+        ELSE r.quantity
+        END
+        ) quantity,
+        (CASE IFNULL(if_receive,0)
+        WHEN 0 THEN trt.receive_remark
+        ELSE r.receive_remark
+        END
+        ) receive_remark,
+        (CASE IFNULL(if_receive,0)
+        WHEN 0 THEN trt.carry_id
+        ELSE r.carry_id
+        END
+        ) carry_id,
+        (CASE IFNULL(if_receive,0)
+        WHEN 0 THEN trt.logistics_code
+        ELSE r.logistics_code
+        END
+        ) logistics_code,tr.trade_time,tr.receive_time,tr.recipient_name,tr.doctor_name
+        FROM `transfer_recipe` tr
+        LEFT JOIN transfer_recipe_tmp trt ON trt.transfer_recipe_id = tr.id
+        LEFT JOIN recipe r ON r.id = tr.native_recipe_id
+        <where>
+            <if test="startDate != null">
+                AND DATE_FORMAT(tr.trade_time,'%Y-%m-%d')
+                BETWEEN DATE_FORMAT(#{startDate},'%Y-%m-%d')
+                AND DATE_FORMAT(#{endDate},'%Y-%m-%d')
+            </if>
+            <if test="ifReceive != null ">
+                AND tr.if_receive = #{ifReceive}
+            </if>
+            <if test="ifReceive == null">
+                AND if_receive != 999
+            </if>
+            <if test="recipientName != null and recipientName != '' ">
+                AND tr.recipient_name = #{recipientName}
+            </if>
+            <if test="carryId != null">
+                AND trt.carry_id = #{carryId}
+            </if>
+            <if test="boilType != null">
+                AND tr.boil_type = #{boilType}
+            </if>
+        </where>
+        ORDER BY tr.trade_time
+    </select>
+  
+  <select id="listByRecipeCode" parameterType="java.util.Set" resultType="com.tangu.tcmts.po.RecipeDO">
+  	SELECT 
+  		<!-- recipe_code, carry_id,  boil_type, sex, age, 
+  		recipient_code, recipient_name, recipient_tel, belong, doctor_name, quantity, 
+  		package_paste, total_package_paste, remark, money, pack_type, medicine_quantity,
+  		total_weight, recipe_type, cal_type, `usage`, process_cost, invoice_code,
+  		take_type, recipe_source, use_his_money,  -->
+  		tr.*,
+  		h.id as hospitalId
+	FROM transfer_recipe tr
+	LEFT JOIN hospital h ON h.hospital_code = tr.hospital_code
+	WHERE
+		`recipe_code` in
+		<foreach collection="set" item="item" index="index" separator="," open="(" close=")">
+			#{item}
+		</foreach>
+  </select>
+</mapper>

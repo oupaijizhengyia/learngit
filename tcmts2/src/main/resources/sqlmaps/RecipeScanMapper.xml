@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.RecipeScanMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.RecipeScan" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="recipe_id" property="recipeId" jdbcType="INTEGER" />
+    <result column="receive_scan_time" property="receiveScanTime" jdbcType="TIMESTAMP" />
+    <result column="receive_scan_use" property="receiveScanUse" jdbcType="INTEGER" />
+    <result column="picture_path" property="picturePath" jdbcType="VARCHAR" />
+    <result column="operate_comment" property="operateComment" jdbcType="VARCHAR" />
+    <result column="operate_type" property="operateType" jdbcType="INTEGER" />
+    <result column="machine_id" property="machineId" jdbcType="INTEGER" />
+    <result column="quantity" property="quantity" jdbcType="INTEGER" />
+    <result column="concentrate_volume" property="concentrateVolume" jdbcType="REAL" />
+    <result column="mod_time" property="modTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <select id="listRecipeScan" parameterType="com.tangu.tcmts.po.RecipeDTO" resultType="com.tangu.tcmts.po.RecipeScan">
+  	SELECT s.`state_name` AS operateTypeName ,rs.receive_scan_time,e.`employee_name` AS employeeName ,
+	rs.operate_comment,rs.concentrate_volume,rs.picture_path
+	FROM `recipe_scan` rs
+	LEFT JOIN `sys_shipping_state` s ON s.`state_id` = rs.`operate_type`
+	LEFT JOIN employee e ON rs.receive_scan_use = e.`id`
+	WHERE recipe_id = #{id} ORDER BY rs.operate_type
+  </select>
+  <select id="findRecipeHistory" parameterType="com.tangu.tcmts.po.RecipeDO" resultType="com.tangu.tcmts.po.RecipeScan">
+  	select receive_scan_time as receiveScanTime,receive_scan_use as receiveScanUse,operate_type as operateType,employee_name as employeeName,
+  	recipe.soak_time as soakTime,recipe.boil_time as boilTime,
+  	recipe.shipping_state as shippingState,recipe.recipient_name as recipientName,recipe.quantity as quantity,
+  	hospital.hospital_nickname as hospitalNickname
+  	from recipe_scan 
+  	left join employee on employee.id=recipe_scan.receive_scan_use
+	left join recipe on recipe.id =recipe_scan.recipe_id
+	left join hospital on recipe.hospital_id = hospital.id where recipe.sys_recipe_code = #{recipeCode,jdbcType=VARCHAR} order by receive_scan_time,recipe_scan.id;
+  </select>
+  <select id="listStartVolume" parameterType="com.tangu.tcmts.po.RecipeDO" resultType="com.tangu.tcmts.po.RecipeScan">
+  	select recipe_id as recipeId,concentrate_volume as startConcentrateVolume
+	from recipe_scan where operate_type=#{shippingState,jdbcType=INTEGER} and recipe_id= #{id,jdbcType=INTEGER}
+  </select>
+  <select id="findRecipeScanXj" parameterType="com.tangu.tcmts.po.RecipeDO" resultType="com.tangu.tcmts.po.RecipeScan">
+  	select recipe_id as recipeId,operate_comment as operateComment from recipe_scan 
+  	where recipe_id=#{id,jdbcType=INTEGER} and operate_type=#{shippingState,jdbcType=INTEGER}
+  </select>
+  <update id="updateRecipeScan" parameterType="com.tangu.tcmts.po.RecipeScan" >
+		update recipe_scan 
+		<set >
+		<if test="recipeId != null and recipeId != ''" >
+			recipe_id=#{recipeId,jdbcType=INTEGER},
+		</if>
+		<if test="receiveScanTime != null and receiveScanTime != ''" >
+			receive_scan_time = #{receiveScanTime,jdbcType=TIMESTAMP},
+		</if>
+		<if test="receiveScanUse != null and receiveScanUse != ''" >
+			receive_scan_use=#{receiveScanUse,jdbcType=INTEGER},
+		</if>
+		<if test="picturePath != null and picturePath != ''" >
+			picture_path = #{picturePath,jdbcType=VARCHAR},
+		</if>
+		<if test="operateComment != null and operateComment != ''" >
+			operate_comment=#{operateComment,jdbcType=VARCHAR},
+		</if>
+		<if test="operateType != null and operateType != ''" >
+			operate_type=#{operateType,jdbcType=INTEGER},
+		</if>
+		<if test="machineId != null and machineId != ''" >
+			machine_id=#{startBoilId,machineId=INTEGER},
+		</if>
+		<if test="quantity != null and quantity != ''" >
+			quantity=#{quantity,jdbcType=INTEGER},
+		</if>
+		<if test="concentrateVolume != null and concentrateVolume != ''" >
+			concentrate_volume = #{concentrateVolume,jdbcType=REAL},
+		</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<insert id="insertCheckState" parameterType="java.util.List">
+		INSERT INTO recipe_scan(recipe_id,receive_scan_time,receive_scan_use,operate_type)
+		VALUES
+	  	<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id},NOW(),#{item.modUser},5)
+		</foreach>
+	</insert>
+	<insert id="insertRecipeScan" parameterType="java.util.List">
+		INSERT INTO `recipe_scan` (recipe_id,receive_scan_time,receive_scan_use,operate_type)
+		values 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.recipeId},NOW(),#{item.receiveScanUse},#{item.operateType})
+		</foreach>
+	</insert>
+	<select id="countEmployeeAchievement" parameterType="com.tangu.tcmts.po.RecipeScan" resultType="com.tangu.tcmts.po.RecipeScan">
+		SELECT  
+			sss.`state_name` as operateTypeName,
+			SUM(r.quantity) AS sumquantity, COUNT(r.`id`) AS countRecipe,e.`employee_name`
+		FROM `recipe_scan` rs
+		INNER JOIN recipe r ON rs.`recipe_id` = r.`id`
+		INNER JOIN `sys_shipping_state` sss ON sss.`state_id` = rs.`operate_type`
+		INNER JOIN employee e ON e.id = rs.`receive_scan_use`
+		<where>
+			<if test="startDate != null">
+				AND rs.receive_scan_time BETWEEN #{startDate} AND #{endDate}
+			</if>
+			<if test="operateType != null and operateType > 0 ">
+				AND rs.operate_type = #{operateType}
+			</if>
+			<if test="receiveScanUse != null">
+				AND rs.receive_scan_use = #{receiveScanUse}
+			</if>
+		</where>
+		GROUP BY rs.receive_scan_use,`operate_type`
+	</select>
+</mapper>

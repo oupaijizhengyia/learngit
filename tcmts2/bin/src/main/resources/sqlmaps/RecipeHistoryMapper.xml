@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.RecipeHistoryMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.RecipeHistory" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="recipe_id" property="recipeId" jdbcType="INTEGER" />
+    <result column="operate_type" property="operateType" jdbcType="INTEGER" />
+    <result column="operate_user" property="operateUser" jdbcType="INTEGER" />
+    <result column="operate_time" property="operateTime" jdbcType="TIMESTAMP" />
+    <result column="operate_comment" property="operateComment" jdbcType="VARCHAR" />
+  </resultMap>
+  <select id="listRecipeHistory" parameterType="com.tangu.tcmts.po.RecipeDTO" resultType="com.tangu.tcmts.po.RecipeHistory">
+	  	SELECT rh.`operate_time`,rh.`operate_comment`, e.`employee_name` AS employeeName 
+		FROM `recipe_history` rh
+		LEFT JOIN employee e ON rh.`operate_user` = e.`id`
+		WHERE rh.`recipe_id` = #{id}
+		ORDER BY rh.operate_time DESC
+  </select>
+</mapper>

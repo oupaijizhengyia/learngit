@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.RecipeProccessMapper" >
+	<update id="updatesProccessDeliveryTime" parameterType="java.util.List" >
+		<foreach collection="list" item="item" index="index" separator=";">
+			update recipe_proccess set delivery_id = #{item.deliveryId} , delivery_time = NOW() 
+			where recipe_id = #{item.recipeId}
+		</foreach>
+	</update>
+</mapper>

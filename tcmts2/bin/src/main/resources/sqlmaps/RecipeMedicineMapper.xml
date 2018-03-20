@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.RecipeMedicineMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.RecipeMedicine" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="recipe_id" property="recipeId" jdbcType="INTEGER" />
+    <result column="medicine_id" property="medicineId" jdbcType="INTEGER" />
+    <result column="medicine_name" property="medicineName" jdbcType="VARCHAR" />
+    <result column="initial_code" property="initialCode" jdbcType="VARCHAR" />
+    <result column="weight" property="weight" jdbcType="DECIMAL" />
+    <result column="trad_price" property="tradPrice" jdbcType="DECIMAL" />
+    <result column="actual_prcie" property="actualPrcie" jdbcType="DECIMAL" />
+    <result column="retail_price" property="retailPrice" jdbcType="DECIMAL" />
+    <result column="trade_freight" property="tradeFreight" jdbcType="DECIMAL" />
+    <result column="retail_freight" property="retailFreight" jdbcType="DECIMAL" />
+    <result column="vat_freight" property="vatFreight" jdbcType="DECIMAL" />
+    <result column="standard_weight" property="standardWeight" jdbcType="DECIMAL" />
+    <result column="special_boil_type" property="specialBoilType" jdbcType="VARCHAR" />
+    <result column="transfer_medicine_id" property="transferMedicineId" jdbcType="INTEGER" />
+    <result column="name_medicineName" property="name_medicineName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, recipe_id, medicine_id, medicine_name, initial_code, weight_every, trad_price, actual_prcie,
+    retail_price, trade_freight, retail_freight, money, standard_weight, special_boil_type,
+    transfer_medicine_id
+  </sql>
+  <select id="getRecipeMedicineByRecipe" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    SELECT
+    rm.id, recipe_id, medicine_id, m.medicine_name AS name_medicineName, rm.initial_code, weight_every, trad_price, actual_prcie,
+    retail_price, trade_freight, retail_freight, money, standard_weight, rm.special_boil_type,
+    transfer_medicine_id,unit_type,m.standard
+    FROM recipe_medicine rm LEFT JOIN medicine m ON rm.medicine_id = m.id
+    where recipe_id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from recipe_medicine
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insertSelective" parameterType="com.tangu.tcmts.po.RecipeMedicine" >
+    <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into recipe_medicine
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="recipeId != null" >
+        recipe_id,
+      </if>
+      <if test="medicineId != null" >
+        medicine_id,
+      </if>
+      <if test="medicineName != null" >
+        medicine_name,
+      </if>
+      <if test="initialCode != null" >
+        initial_code,
+      </if>
+      <if test="weightEvery != null" >
+        weight_every,
+      </if>
+      <if test="tradPrice != null" >
+        trad_price,
+      </if>
+      <if test="actualPrcie != null" >
+        actual_prcie,
+      </if>
+      <if test="retailPrice != null" >
+        retail_price,
+      </if>
+      <if test="tradeFreight != null" >
+        trade_freight,
+      </if>
+      <if test="retailFreight != null" >
+        retail_freight,
+      </if>
+      <if test="money != null" >
+        money,
+      </if>
+      <if test="standardWeight != null" >
+        standard_weight,
+      </if>
+      <if test="specialBoilType != null" >
+        special_boil_type,
+      </if>
+      <if test="transferMedicineId != null" >
+        transfer_medicine_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="recipeId != null" >
+        #{recipeId,jdbcType=INTEGER},
+      </if>
+      <if test="medicineId != null" >
+        #{medicineId,jdbcType=INTEGER},
+      </if>
+      <if test="medicineName != null" >
+        #{medicineName,jdbcType=VARCHAR},
+      </if>
+      <if test="initialCode != null" >
+        #{initialCode,jdbcType=VARCHAR},
+      </if>
+      <if test="weightEvery != null" >
+        #{weightEvery,jdbcType=DECIMAL},
+      </if>
+      <if test="tradPrice != null" >
+        #{tradPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="actualPrcie != null" >
+        #{actualPrcie,jdbcType=DECIMAL},
+      </if>
+      <if test="retailPrice != null" >
+        #{retailPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="tradeFreight != null" >
+        #{tradeFreight,jdbcType=DECIMAL},
+      </if>
+      <if test="retailFreight != null" >
+        #{retailFreight,jdbcType=DECIMAL},
+      </if>
+      <if test="money != null" >
+        #{money,jdbcType=DECIMAL},
+      </if>
+      <if test="standardWeight != null" >
+        #{standardWeight,jdbcType=DECIMAL},
+      </if>
+      <if test="specialBoilType != null" >
+        #{specialBoilType,jdbcType=VARCHAR},
+      </if>
+      <if test="transferMedicineId != null" >
+        #{transferMedicineId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tangu.tcmts.po.RecipeMedicine" >
+    update recipe_medicine
+    <set >
+      <if test="recipeId != null" >
+        recipe_id = #{recipeId,jdbcType=INTEGER},
+      </if>
+      <if test="medicineId != null" >
+        medicine_id = #{medicineId,jdbcType=INTEGER},
+      </if>
+      <if test="medicineName != null" >
+        medicine_name = #{medicineName,jdbcType=VARCHAR},
+      </if>
+      <if test="initialCode != null" >
+        initial_code = #{initialCode,jdbcType=VARCHAR},
+      </if>
+      <if test="weightEvery != null" >
+        weight_every = #{weightEvery,jdbcType=DECIMAL},
+      </if>
+      <if test="tradPrice != null" >
+        trad_price = #{tradPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="actualPrcie != null" >
+        actual_prcie = #{actualPrcie,jdbcType=DECIMAL},
+      </if>
+      <if test="retailPrice != null" >
+        retail_price = #{retailPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="tradeFreight != null" >
+        trade_freight = #{tradeFreight,jdbcType=DECIMAL},
+      </if>
+      <if test="retailFreight != null" >
+        retail_freight = #{retailFreight,jdbcType=DECIMAL},
+      </if>
+      <if test="money != null" >
+        money = #{money,jdbcType=DECIMAL},
+      </if>
+      <if test="standardWeight != null" >
+        standard_weight = #{standardWeight,jdbcType=DECIMAL},
+      </if>
+      <if test="specialBoilType != null" >
+        special_boil_type = #{specialBoilType,jdbcType=VARCHAR},
+      </if>
+      <if test="transferMedicineId != null" >
+        transfer_medicine_id = #{transferMedicineId,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <insert id="insertByBatch" parameterType="com.tangu.tcmts.po.RecipeDO" >
+  	INSERT INTO recipe_medicine
+  	(
+  	recipe_id, medicine_id, medicine_name, initial_code, weight_every, 
+  	trad_price, actual_prcie,retail_price, trade_freight, retail_freight, 
+  	money, standard_weight, special_boil_type,transfer_medicine_id
+  	) 
+    VALUES
+    <foreach collection="recipeMedicineList" item="item" index="index" separator=",">
+      (#{id},#{item.medicineId},#{item.medicineName},#{item.initialCode},#{item.weightEvery},
+      #{item.tradPrice},#{item.actualPrcie},#{item.retailPrice},#{item.tradeFreight},#{item.retailFreight},
+      #{item.money},#{item.standardWeight},#{item.specialBoilType},#{item.transferMedicineId})
+    </foreach>
+  </insert>
+  <update id="updateRecipeMedicine" parameterType="java.util.List">
+  	<foreach collection="list" item="item" index="index" separator=";">
+	  	update recipe_medicine
+	  	set medicine_id = #{item.medicineId},
+	  	medicine_name = #{item.medicineName},
+	  	initial_code =#{item.initialCode},
+	  	weight_every = #{item.weightEvery},
+	  	special_boil_type = #{item.specialBoilType},
+	  	trad_price = #{item.tradPrice},
+	  	retail_price = #{item.retailPrice},
+	  	trade_freight = #{item.tradeFreight},
+	  	retail_freight = #{item.retailFreight},
+	  	money = #{item.money}
+	  	where id = #{item.id}
+  	</foreach>
+  </update>
+  <select id="listNativeRecipeMedicine" parameterType="com.tangu.tcmts.po.RecipeDO" resultMap="BaseResultMap">
+  	select id, recipe_id , medicine_id from recipe_medicine where recipe_id = #{id}
+  </select>
+  <delete id="deleteRecipeMedicine" parameterType="com.tangu.tcmts.po.RecipeDO" >
+  	delete from recipe_medicine  where recipe_id = #{id}
+  </delete>
+  <select id="findRecipeMedicineBySpecialBoilType" parameterType="com.tangu.tcmts.po.RecipeMedicine" resultMap="BaseResultMap">
+  	select id, recipe_id , medicine_id,medicine_name from recipe_medicine where recipe_id = #{recipeId,jdbcType=INTEGER} and special_boil_type =#{specialBoilType,jdbcType=VARCHAR}
+  </select>
+  <update id="updateRecipeMedicines" parameterType="java.util.List">
+  	<foreach collection="list" item="item" index="index" separator=";">
+	  	update recipe_medicine
+	  	set 
+	  	special_boil_type = #{item.specialBoilType}
+	  	where id = #{item.id}
+  	</foreach>
+  </update>
+</mapper>

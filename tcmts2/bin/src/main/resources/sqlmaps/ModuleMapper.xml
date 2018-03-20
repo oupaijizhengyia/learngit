@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.ModuleMapper">
+    <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.Module" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="url" property="url" jdbcType="VARCHAR" />
+        <result column="parent_id" property="parentId" jdbcType="INTEGER" />
+        <result column="icon" property="icon" jdbcType="VARCHAR" />
+        <result column="orderitem" property="orderItem" jdbcType="TINYINT" />
+        <result column="use_state" property="useState" jdbcType="INTEGER" />
+        <result column="is_menu" property="isMenu" jdbcType="TINYINT"/>
+        <result column="config" property="config" jdbcType="JAVA_OBJECT"/>
+        <collection property="functions" ofType="com.tangu.tcmts.po.Function">
+            <id column="f_id" property="id" />
+            <result column="f_name" property="name" />
+            <result column="f_icon" property="icon" />
+            <result column="f_code" property="code" />
+            <result column="f_module_id" property="moduleId" />
+            <result column="f_seq" property="seq" />
+        </collection>
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, name, url, parent_id, icon, orderitem, use_state,is_menu, config
+    </sql>
+    <select id="getModuleList" resultMap="BaseResultMap"
+            parameterType="com.tangu.tcmts.po.Module">
+        select m.*,
+        f.id f_id,
+        f.name f_name,
+        f.icon f_icon,
+        f.code f_code,
+        f.module_id f_module_id,
+        f.seq f_seq
+        from
+        (select
+        <include refid="Base_Column_List" />
+        from sys_module
+        ORDER BY orderitem
+        ) m
+        left join sys_function f on m.id = f.module_id and f.use_state=0
+        WHERE m.use_state=0
+    </select>
+    <select id="getFunctionByRole" resultMap="BaseResultMap"
+            parameterType="Map">
+        select m.*,
+        f.id f_id,
+        f.name f_name,
+        f.icon f_icon,
+        f.code f_code,
+        f.module_id f_module_id,
+        f.seq f_seq
+        from
+        (select
+        <include refid="Base_Column_List" />
+        from sys_module
+        where id in (select `module_id` from sys_role_module where role_id = #{roleid})
+        and use_state=0 and is_menu=1
+        ) m
+        left join
+        (
+        select * from sys_function
+        where id in (select `function_id` from sys_role_function where role_id = #{roleid})
+        and use_state=0
+        ) f on m.id = f.module_id
+    </select>
+    <insert id="insertSysRoleModule" parameterType="com.tangu.tcmts.po.SysRole">
+        insert into sys_role_module (role_id,module_id)
+        values
+        <foreach collection="moduleList" index="index" item="item" separator=",">
+            (#{id},#{item.id})
+        </foreach>
+    </insert>
+    <insert id="insertSysRoleFuntion" parameterType="com.tangu.tcmts.po.SysRole">
+        insert into sys_role_function (role_id,function_id)
+        VALUES
+        <foreach collection="functionList" item="item" index="index" separator=",">
+            (#{id},#{item.id})
+        </foreach>
+    </insert>
+</mapper>

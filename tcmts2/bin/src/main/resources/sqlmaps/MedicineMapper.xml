@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.MedicineMapper">
+	<resultMap id="BaseResultMap" type="com.tangu.tcmts.po.MedicineDO">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="medicine_name" property="medicineName"
+			jdbcType="VARCHAR" />
+		<result column="medicine_code" property="medicineCode"
+			jdbcType="VARCHAR" />
+		<result column="initial_code" property="initialCode" jdbcType="VARCHAR" />
+		<result column="mnemonic_code" property="mnemonicCode"
+			jdbcType="VARCHAR" />
+		<result column="standard" property="standard" jdbcType="VARCHAR" />
+		<result column="special_boil_type" property="specialBoilType"
+			jdbcType="VARCHAR" />
+		<result column="tax_rate" property="taxRate" jdbcType="DECIMAL" />
+		<result column="medicine_type" property="medicineType"
+			jdbcType="INTEGER" />
+		<result column="cream_formula_type" property="creamFormulaType"
+			jdbcType="INTEGER" />
+		<result column="unit_type" property="unitType" jdbcType="INTEGER" />
+		<result column="common_code" property="commonCode" jdbcType="VARCHAR" />
+		<result column="operate_time" property="operateTime" jdbcType="INTEGER" />
+		<result column="use_state" property="useState" jdbcType="BIT" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="mod_user" property="modUser" jdbcType="INTEGER" />
+	</resultMap>
+	<select id="listMedicine" parameterType="com.tangu.tcmts.po.MedicineDTO"
+		resultType="com.tangu.tcmts.po.MedicineDO">
+		SELECT
+		m.`id`,m.`medicine_name`,m.`medicine_code`,m.`mnemonic_code`,
+		m.`use_state`, m.`special_boil_type`, m.`standard`
+		FROM `medicine` m
+		LEFT JOIN `medicine_detail` md ON md.`medicine_id` = m.`id`
+		<where>
+			<if test="medicineName != null and medicineName != '' ">
+				AND (
+				m.medicine_name LIKE CONCAT('%',#{medicineName},'%')
+				OR
+				m.initial_code LIKE CONCAT('%',#{medicineName},'%')
+				OR
+				m.mnemonic_code LIKE CONCAT('%',#{medicineName},'%')
+				)
+			</if>
+			<if test="medicineCode != null and medicineCode != '' ">
+				AND m.medicine_code LIKE CONCAT('%',#{medicineCode},'%')
+			</if>
+			<if test="useState != null">
+				AND m.use_state = #{useState}
+			</if>
+			<if test="id != null">
+				AND m.id = #{id}
+			</if>
+		</where>
+		ORDER BY m.initial_code 
+	</select>
+	<select id="listSunMedicineCode" resultType="com.tangu.tcmts.po.SysLookup">
+		SELECT medicine_code AS
+		`value`,medicine_code AS `label` FROM sunshine_medicine
+	</select>
+	<insert id="addMedicine" parameterType="com.tangu.tcmts.po.MedicineDO">
+		<selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT @@IDENTITY
+		</selectKey>
+		INSERT INTO `medicine`
+		(medicine_name,medicine_code,standard,unit_type,mnemonic_code,initial_code,
+		special_boil_type,operate_time,medicine_type,cream_formula_type,common_code)
+		values
+		(#{medicineName},#{medicineCode},#{standard},#{unitType},#{mnemonicCode},#{initialCode},
+		#{specialBoilType},#{operateTime},#{medicineType},#{creamFormulaType},#{commonCode})
+	</insert>
+	<resultMap id="BaseResultMap1" type="com.tangu.tcmts.po.MedicineDO">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="medicine_name" property="medicineName"
+			jdbcType="VARCHAR" />
+		<result column="medicine_code" property="medicineCode"
+			jdbcType="VARCHAR" />
+		<result column="initial_code" property="initialCode" jdbcType="VARCHAR" />
+		<result column="mnemonic_code" property="mnemonicCode"
+			jdbcType="VARCHAR" />
+		<result column="standard" property="standard" jdbcType="VARCHAR" />
+		<result column="special_boil_type" property="specialBoilType"
+			jdbcType="VARCHAR" />
+		<result column="tax_rate" property="taxRate" jdbcType="DECIMAL" />
+		<result column="medicine_type" property="medicineType"
+			jdbcType="INTEGER" />
+		<result column="cream_formula_type" property="creamFormulaType"
+			jdbcType="INTEGER" />
+		<result column="unit_type" property="unitType" jdbcType="INTEGER" />
+		<result column="common_code" property="commonCode" jdbcType="VARCHAR" />
+		<result column="operate_time" property="operateTime" jdbcType="INTEGER" />
+		<result column="use_state" property="useState" jdbcType="BIT" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="mod_user" property="modUser" jdbcType="INTEGER" />
+		<collection property="standardList"
+			ofType="com.tangu.tcmts.po.MedicineStandardDO">
+			<id column="standard_id" property="id" jdbcType="INTEGER" />
+			<result column="standard_medicine_id" property="medicineId"
+				jdbcType="INTEGER" />
+			<result column="standard_standard_name" property="standardName"
+				jdbcType="VARCHAR" />
+				<result column="name_standard_name" property="name_standardName"
+				jdbcType="VARCHAR" />
+			<result column="standard_standard_code" property="standardCode"
+				jdbcType="VARCHAR" />
+			<result column="standard_manufacturing_enterprise" property="manufacturingEnterprise"
+				jdbcType="VARCHAR" />
+			<result column="standard_producing_area" property="producingArea"
+				jdbcType="VARCHAR" />
+		</collection>
+	</resultMap>
+	<select id="getMedicineById" parameterType="com.tangu.tcmts.po.MedicineDTO"
+		resultMap="BaseResultMap1">
+		SELECT
+		m.`id`,m.medicine_name,m.`medicine_code`,m.standard,m.mnemonic_code,m.`special_boil_type`,m.`operate_time`,
+		m.`medicine_type`,m.`cream_formula_type`,m.`common_code`,
+		ms.`id` as
+		standard_id,ms.standard_name as standard_standard_name,ms.standard_name as name_standard_name,
+		ms.standard_code as standard_standard_code,ms.manufacturing_enterprise
+		as standard_manufacturing_enterprise,
+		ms.producing_area as
+		standard_producing_area,ms.medicine_id as standard_medicine_id
+		FROM
+		`medicine` m
+		LEFT JOIN `medicine_standard` ms ON ms.`medicine_id`=m.`id`
+		<where>
+			<if test="id != null ">
+				m.id=#{id}
+			</if>
+		</where>
+	</select>
+	<update id="updateMedicine" parameterType="com.tangu.tcmts.po.MedicineDO">
+		UPDATE medicine
+		<set>
+			medicine_name=#{medicineName},
+			medicine_code=#{medicineCode},
+			initial_code=#{initialCode},
+			standard=#{standard},
+			unit_type=#{unitType},
+			mnemonic_code=#{mnemonicCode},
+			special_boil_type=#{specialBoilType},
+			operate_time=#{operateTime},
+			medicine_type=#{medicineType},
+			cream_formula_type=#{creamFormulaType},
+			common_code=#{commonCode},
+			mod_user=#{modUser}
+		</set>
+		WHERE id=#{id}
+	</update>
+	<update id="updateState" parameterType="com.tangu.tcmts.po.MedicineDTO">
+		UPDATE medicine
+		<set>
+			use_state=#{useState},
+			mod_user=#{modUser}
+		</set>
+		WHERE id=#{id}
+	</update>
+
+	<!--目前没有用到，等版本稳定后删掉[Lei]-->
+	<select id="getMedicineName" parameterType="java.lang.String" resultType="com.tangu.tcmts.po.PublicDO">
+		SELECT id AS value,medicine_name AS label,standard AS unit
+		FROM `medicine`
+		WHERE medicine_name LIKE CONCAT("%", #{medicineName}, "%")
+	</select>
+	
+	<select id="listMedicineById" parameterType="java.util.List" resultMap="BaseResultMap">
+		SELECT
+		m.`id`,m.`medicine_name`,m.`medicine_code`,m.`mnemonic_code`,m.`use_state`
+		FROM `medicine` m
+		where m.id in 
+		<foreach item="item" collection="list" separator="," open="("  close=")">
+			#{item.id}
+		</foreach>
+	</select>
+	<insert id="addMedicines" parameterType="java.util.List">
+		INSERT INTO `medicine`
+		(medicine_name,medicine_code,standard,unit_type,mnemonic_code,initial_code,
+		special_boil_type,operate_time,medicine_type,cream_formula_type,common_code)
+		values
+		<foreach collection="list" item="item" index="index" separator="," >
+			(#{item.medicineName},#{item.medicineCode},#{item.standard},#{item.unitType},#{item.mnemonicCode},#{item.initialCode},
+			#{item.specialBoilType},#{item.operateTime},#{item.medicineType},#{item.creamFormulaType},#{item.commonCode})
+		</foreach>
+	</insert>
+	<select id="getMedicineByName" parameterType="com.tangu.tcmts.po.MedicineDO" resultType="java.lang.Integer">
+		SELECT count(*) FROM medicine 
+		<where>
+			<if test="medicineName != null and medicineName !='' ">
+				AND medicine_name = #{medicineName} 
+			</if>
+			<if test="medicineCode != null and medicineCode !='' ">
+				AND medicine_code = #{medicineCode}
+			</if>
+			<if test=" id != null">
+				AND id != #{id}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getAllMedicineTaxRate" parameterType="java.util.List" resultType="com.tangu.tcmts.po.MedicineDO">
+		select medicine_id as medicineId,IFNULL(tax_rate,0) as taxRate
+		from medicine
+		<where>
+			<if test="list!=null">
+				id in(
+				<foreach item="item" collection="list" separator=",">
+					#{item}
+				</foreach>
+				)
+			</if>
+		</where>
+	</select>
+	<select id="findXjMedicineList" parameterType="com.tangu.tcmts.po.MedicineDO" resultType="com.tangu.tcmts.po.MedicineDO">
+		select 
+		medicine.id as id,
+	  	medicine.medicine_type as medicineType,
+		ifnull(medicine.operate_time,0) as operateTime,
+		medicine.special_boil_type as specialBoilType,
+	  	IFNULL(medicine.unit_type,1) as unitType,
+		IFNULL(medicine.mnemonic_code,'') as mnemonicCode,
+		IFNULL(medicine.medicine_name,'') as medicineName,
+		IFNULL(medicine.standard,'') as standard
+		from medicine where special_boil_type=#{specialBoilType,jdbcType=VARCHAR}
+	</select>
+</mapper>

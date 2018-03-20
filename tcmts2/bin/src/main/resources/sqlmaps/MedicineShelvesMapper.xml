@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tangu.tcmts.dao.MedicineShelvesMapper">
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.MedicineShelves">
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, shelves_code, shelves_type, remark, create_time, mod_user, ms.mod_time
+  </sql>
+  <select id="listMedicineShelvesByIds" parameterType="java.util.List" resultMap="BaseResultMap">
+	SELECT
+	shelves_code, shelves_type, remark 
+	from medicine_shelves ms
+	WHERE id in 
+	<foreach item="item" collection="list" separator="," open="("  close=")">
+		#{item.id}
+	</foreach>
+  </select>
+  <select id="listMedicineShelves" parameterType="com.tangu.tcmts.po.MedicineShelves" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />, sl.label as shelvesTypeName
+    from medicine_shelves ms
+    left join sys_lookup sl on sl.code = 'shelvesType' 
+    	and sl.value = ms.shelves_type
+    <where>
+      <if test="shelvesCode != null and shelvesCode != ''">
+        and shelves_code = #{shelvesCode}
+      </if>
+      <if test="shelvesType != null">
+        and shelves_type = #{shelvesType}
+      </if>
+      <if test="id != null ">
+      	and id != #{id}
+      </if>
+    </where>
+    order by create_time desc
+  </select>
+
+  <select id="getMedicineShelvesByShelvescode" parameterType="com.tangu.tcmts.po.MedicineShelves" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from medicine_shelves ms
+    <where>
+      <if test="shelvesCode != null">
+        and shelves_code = #{shelvesCode}
+      </if>
+
+    </where>
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from medicine_shelves
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertSelective" parameterType="com.tangu.tcmts.po.MedicineShelves">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into medicine_shelves
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="shelvesCode != null">
+        shelves_code,
+      </if>
+      <if test="shelvesType != null">
+        shelves_type,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="modUser != null">
+        mod_user,
+      </if>
+      <if test="modTime != null">
+        mod_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="shelvesCode != null">
+        #{shelvesCode,jdbcType=INTEGER},
+      </if>
+      <if test="shelvesType != null">
+        #{shelvesType,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modUser != null">
+        #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="modTime != null">
+        #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tangu.tcmts.po.MedicineShelves">
+    update medicine_shelves
+    <set>
+      <if test="shelvesCode != null">
+        shelves_code = #{shelvesCode,jdbcType=INTEGER},
+      </if>
+      <if test="shelvesType != null">
+        shelves_type = #{shelvesType,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modUser != null">
+        mod_user = #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="modTime != null">
+        mod_time = #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="seleteRecipeByShelvesCode" parameterType="com.tangu.tcmts.po.MedicineShelves" resultType="java.lang.Integer">
+  	SELECT COUNT(id) FROM `recipe` WHERE shelves_code = #{shelvesCode} AND 
+  	DATE_SUB(CURDATE(), INTERVAL 30 DAY) &lt;= create_time 
+  </select>
+</mapper>

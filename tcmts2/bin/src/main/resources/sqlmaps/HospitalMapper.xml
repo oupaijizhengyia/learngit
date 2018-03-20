@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.HospitalMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.HospitalDO" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_code" property="hospitalCode" jdbcType="VARCHAR" />
+    <result column="hospital_company" property="hospitalCompany" jdbcType="VARCHAR" />
+    <result column="initial_code" property="initialCode" jdbcType="VARCHAR" />
+    <result column="hospital_nickname" property="hospitalNickname" jdbcType="VARCHAR" />
+    <result column="hospital_manager" property="hospitalManager" jdbcType="VARCHAR" />
+    <result column="hospital_tel" property="hospitalTel" jdbcType="VARCHAR" />
+    <result column="province" property="province" jdbcType="VARCHAR" />
+    <result column="city" property="city" jdbcType="VARCHAR" />
+    <result column="region" property="region" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="settle_company_id" property="settleCompanyId" jdbcType="INTEGER" />
+    <result column="outpatient_tag_print" property="outpatientTagPrint" jdbcType="INTEGER" />
+    <result column="outpatient_recipe_print" property="outpatientRecipePrint" jdbcType="INTEGER" />
+    <result column="outpatient_tag_type" property="outpatientTagType" jdbcType="INTEGER" />
+    <result column="outpatient_tag_num" property="outpatientTagNum" jdbcType="INTEGER" />
+    <result column="outpatient_boil_type" property="outpatientBoilType" jdbcType="INTEGER" />
+    <result column="outpatient_boil_num" property="outpatientBoilNum" jdbcType="INTEGER" />
+    <result column="hospital_tag_print" property="hospitalTagPrint" jdbcType="INTEGER" />
+    <result column="hospital_recipe_print" property="hospitalRecipePrint" jdbcType="INTEGER" />
+    <result column="hospital_tag_type" property="hospitalTagType" jdbcType="INTEGER" />
+    <result column="hospital_tag_num" property="hospitalTagNum" jdbcType="INTEGER" />
+    <result column="hospital_boil_type" property="hospitalBoilType" jdbcType="INTEGER" />
+    <result column="hospital_boil_num" property="hospitalBoilNum" jdbcType="INTEGER" />
+    <result column="carry_type" property="carryType" jdbcType="INTEGER" />
+    <result column="sunshine_code" property="sunshineCode" jdbcType="VARCHAR" />
+    <result column="is_print_process" property="isPrintProcess" jdbcType="BIT" />
+    <result column="use_state" property="useState" jdbcType="BIT" />
+    <result column="mod_user" property="modUser" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="mod_time" property="modTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <resultMap id="ListResultMap" type="com.tangu.tcmts.po.HospitalListVO">
+
+  </resultMap>
+  <select id="getHospitalContent" resultType="com.tangu.tcmts.po.HospitalDO" parameterType="java.lang.Integer" >
+    SELECT 
+    h.id, h.hospital_code, h.hospital_company, h.initial_code, h.hospital_nickname, h.hospital_manager,
+    h.hospital_tel, h.province, h.city, h.region, h.address, h.settle_company_id, h.outpatient_tag_print,
+    h.outpatient_recipe_print, h.outpatient_tag_type, h.outpatient_tag_num, h.outpatient_boil_type,
+    h.outpatient_boil_num, h.hospital_tag_print, h.hospital_recipe_print, h.hospital_tag_type,
+    h.hospital_tag_num, h.hospital_boil_type, h.hospital_boil_num, h.carry_type, h.sunshine_code,
+    h.is_print_process, h.use_state, h.mod_user, h.create_time, h.mod_time,h.carry_type,
+    sc.price_type_id, sc.`discount`,sc.`process_cost`,sc.packing,sc.fee_rate
+    FROM hospital h 
+    LEFT JOIN `settle_company` sc ON sc.`id` = h.`settle_company_id`
+    WHERE h.id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="listHospitals" resultMap="ListResultMap" parameterType="com.tangu.tcmts.po.HospitalDTO">
+    SELECT
+    h.id,hospital_company,hospital_nickname,hospital_code,
+    h.use_state,pt.templet_name AS priceTypeName,settle_company_name
+    FROM hospital h LEFT JOIN settle_company sc ON h.settle_company_id=sc.id
+	LEFT JOIN price_templet pt ON sc.price_type_id=pt.id
+    <where>
+        <if test="hospitalCode != null">
+          AND  hospital_code like CONCAT('%',#{hospitalCode},'%')
+        </if>
+        <if test="hospitalCompany != null">
+          AND (h.hospital_nickname like CONCAT('%',#{hospitalCompany},'%') or hospital_company like CONCAT('%',#{hospitalCompany},'%'))
+        </if>
+        <if test="useState != null">
+          AND h.use_state = #{useState}
+        </if>
+        <if test="settleCompanyId != null">
+          AND settle_company_id=#{settleCompanyId}
+        </if>
+    </where>
+    ORDER BY h.create_time DESC
+  </select>
+  <select id="getRepeatHospital" parameterType="com.tangu.tcmts.po.HospitalDO" resultType="java.lang.Integer">
+    SELECT count(*) from hospital
+    where (hospital_company=#{hospitalCompany} or hospital_nickname=#{hospitalNickname})
+    <if test=" id != null ">
+    AND id != #{id}
+    </if>
+  </select>
+
+  <insert id="insertHospital" parameterType="com.tangu.tcmts.po.HospitalDO" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into hospital
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="hospitalCode != null" >
+        hospital_code,
+      </if>
+      <if test="hospitalCompany != null" >
+        hospital_company,
+      </if>
+      <if test="initialCode != null" >
+        initial_code,
+      </if>
+      <if test="hospitalNickname != null" >
+        hospital_nickname,
+      </if>
+      <if test="hospitalManager != null" >
+        hospital_manager,
+      </if>
+      <if test="hospitalTel != null" >
+        hospital_tel,
+      </if>
+      <if test="province != null" >
+        province,
+      </if>
+      <if test="city != null" >
+        city,
+      </if>
+      <if test="region != null" >
+        region,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="settleCompanyId != null" >
+        settle_company_id,
+      </if>
+      <if test="outpatientTagPrint != null" >
+        outpatient_tag_print,
+      </if>
+      <if test="outpatientRecipePrint != null" >
+        outpatient_recipe_print,
+      </if>
+      <if test="outpatientTagType != null" >
+        outpatient_tag_type,
+      </if>
+      <if test="outpatientTagNum != null" >
+        outpatient_tag_num,
+      </if>
+      <if test="outpatientBoilType != null" >
+        outpatient_boil_type,
+      </if>
+      <if test="outpatientBoilNum != null" >
+        outpatient_boil_num,
+      </if>
+      <if test="hospitalTagPrint != null" >
+        hospital_tag_print,
+      </if>
+      <if test="hospitalRecipePrint != null" >
+        hospital_recipe_print,
+      </if>
+      <if test="hospitalTagType != null" >
+        hospital_tag_type,
+      </if>
+      <if test="hospitalTagNum != null" >
+        hospital_tag_num,
+      </if>
+      <if test="hospitalBoilType != null" >
+        hospital_boil_type,
+      </if>
+      <if test="hospitalBoilNum != null" >
+        hospital_boil_num,
+      </if>
+      <if test="carryType != null" >
+        carry_type,
+      </if>
+      <if test="sunshineCode != null" >
+        sunshine_code,
+      </if>
+      <if test="isPrintProcess != null" >
+        is_print_process,
+      </if>
+      <if test="useState != null" >
+        use_state,
+      </if>
+      <if test="modUser != null" >
+        mod_user,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modTime != null" >
+        mod_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="hospitalCode != null" >
+        #{hospitalCode,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalCompany != null" >
+        #{hospitalCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="initialCode != null" >
+        #{initialCode,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalNickname != null" >
+        #{hospitalNickname,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalManager != null" >
+        #{hospitalManager,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalTel != null" >
+        #{hospitalTel,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null" >
+        #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null" >
+        #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null" >
+        #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="settleCompanyId != null" >
+        #{settleCompanyId,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientTagPrint != null" >
+        #{outpatientTagPrint,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientRecipePrint != null" >
+        #{outpatientRecipePrint,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientTagType != null" >
+        #{outpatientTagType,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientTagNum != null" >
+        #{outpatientTagNum,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientBoilType != null" >
+        #{outpatientBoilType,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientBoilNum != null" >
+        #{outpatientBoilNum,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalTagPrint != null" >
+        #{hospitalTagPrint,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalRecipePrint != null" >
+        #{hospitalRecipePrint,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalTagType != null" >
+        #{hospitalTagType,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalTagNum != null" >
+        #{hospitalTagNum,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalBoilType != null" >
+        #{hospitalBoilType,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalBoilNum != null" >
+        #{hospitalBoilNum,jdbcType=INTEGER},
+      </if>
+      <if test="carryType != null" >
+        #{carryType,jdbcType=INTEGER},
+      </if>
+      <if test="sunshineCode != null" >
+        #{sunshineCode,jdbcType=VARCHAR},
+      </if>
+      <if test="isPrintProcess != null" >
+        #{isPrintProcess,jdbcType=BIT},
+      </if>
+      <if test="useState != null" >
+        #{useState,jdbcType=BIT},
+      </if>
+      <if test="modUser != null" >
+        #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modTime != null" >
+        #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateHospital" parameterType="com.tangu.tcmts.po.HospitalDO" >
+    update hospital
+    <set >
+      <if test="hospitalCode != null" >
+        hospital_code = #{hospitalCode,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalCompany != null" >
+        hospital_company = #{hospitalCompany,jdbcType=VARCHAR},
+      </if>
+      <if test="initialCode != null" >
+        initial_code = #{initialCode,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalNickname != null" >
+        hospital_nickname = #{hospitalNickname,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalManager != null" >
+        hospital_manager = #{hospitalManager,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalTel != null" >
+        hospital_tel = #{hospitalTel,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null" >
+        province = #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null" >
+        city = #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null" >
+        region = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="settleCompanyId != null" >
+        settle_company_id = #{settleCompanyId,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientTagPrint != null" >
+        outpatient_tag_print = #{outpatientTagPrint,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientRecipePrint != null" >
+        outpatient_recipe_print = #{outpatientRecipePrint,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientTagType != null" >
+        outpatient_tag_type = #{outpatientTagType,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientTagNum != null" >
+        outpatient_tag_num = #{outpatientTagNum,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientBoilType != null" >
+        outpatient_boil_type = #{outpatientBoilType,jdbcType=INTEGER},
+      </if>
+      <if test="outpatientBoilNum != null" >
+        outpatient_boil_num = #{outpatientBoilNum,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalTagPrint != null" >
+        hospital_tag_print = #{hospitalTagPrint,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalRecipePrint != null" >
+        hospital_recipe_print = #{hospitalRecipePrint,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalTagType != null" >
+        hospital_tag_type = #{hospitalTagType,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalTagNum != null" >
+        hospital_tag_num = #{hospitalTagNum,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalBoilType != null" >
+        hospital_boil_type = #{hospitalBoilType,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalBoilNum != null" >
+        hospital_boil_num = #{hospitalBoilNum,jdbcType=INTEGER},
+      </if>
+      <if test="carryType != null" >
+        carry_type = #{carryType,jdbcType=INTEGER},
+      </if>
+      <if test="sunshineCode != null" >
+        sunshine_code = #{sunshineCode,jdbcType=VARCHAR},
+      </if>
+      <if test="isPrintProcess != null" >
+        is_print_process = #{isPrintProcess,jdbcType=BIT},
+      </if>
+      <if test="useState != null" >
+        use_state = #{useState,jdbcType=BIT},
+      </if>
+      <if test="modUser != null" >
+        mod_user = #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modTime != null" >
+        mod_time = #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateUseState" parameterType="com.tangu.tcmts.po.HospitalDTO">
+      UPDATE hospital
+      SET use_state=#{useState},
+          mod_user=#{modUser},
+          mod_time=#{modTime}
+      WHERE id=#{id}
+  </update>
+  <select id="listhospitalCompany" parameterType="com.tangu.tcmts.po.HospitalDTO" resultType="com.tangu.tcmts.po.HospitalListVO">
+  		SELECT id,hospital_company,hospital_code FROM `hospital` 
+  		<where>
+  			use_state = 0
+  			
+  			<if test="hospitalCompany != null and hospitalCompany != '' ">
+  				AND (hospital_company LIKE CONCAT('%',#{hospitalCompany},'%')
+  				or initial_code LIKE CONCAT('%',#{hospitalCompany},'%')
+  				or hospital_nickname like CONCAT('%',#{hospitalCompany},'%')
+  				)
+  			</if>
+  		</where>
+  </select>
+   <select id="listHospitalName" parameterType="com.tangu.tcmts.po.HospitalDTO" resultType="com.tangu.tcmts.po.HospitalListVO">
+  		SELECT id,hospital_company,hospital_code FROM `hospital` 
+  		<where>
+  			use_state = 0
+  			<if test="hospitalCompany != null and hospitalCompany != '' ">
+  				AND (hospital_company LIKE CONCAT('%',#{hospitalCompany},'%')
+  				or initial_code LIKE CONCAT('%',#{hospitalCompany},'%')
+  				or hospital_nickname like CONCAT('%',#{hospitalCompany},'%')
+  				)
+  			</if>
+  		</where>
+  </select>
+</mapper>

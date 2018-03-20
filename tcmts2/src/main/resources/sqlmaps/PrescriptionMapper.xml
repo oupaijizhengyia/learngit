@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.PrescriptionMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.Prescription" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="prescription_name" property="prescriptionName" jdbcType="VARCHAR" />
+    <result column="unified_code" property="unifiedCode" jdbcType="VARCHAR" />
+    <result column="system_name" property="systemName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="mod_user" property="modUser" jdbcType="INTEGER" />
+    <result column="mod_time" property="modTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <select id="getPrescriptionList" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.Prescription" >
+    select 
+    p.id, hospital_company, prescription_name,hospital_id
+    from prescription p LEFT JOIN hospital h ON p.hospital_id=h.id
+    <where>
+      <if test="hospitalId != null">
+        hospital_id=#{hospitalId}
+      </if>
+      <if test="prescriptionName != null">
+        AND prescription_name LIKE CONCAT('%',#{prescriptionName},'%')
+      </if>
+      <if test="id != null" >
+        AND p.id=#{id}
+      </if>
+    </where>
+    ORDER BY p.create_time DESC
+  </select>
+  <select id="repeatPrescription" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.Prescription">
+    SELECT prescription_name
+    FROM prescription
+    <where>
+      hospital_id=#{hospitalId} And prescription_name=#{prescriptionName}
+      <if test="id != null">
+        AND id != #{id}
+      </if>
+    </where>
+
+  </select>
+  <insert id="insertPrescription" parameterType="com.tangu.tcmts.po.Prescription" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+    SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into prescription
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="prescriptionName != null" >
+        prescription_name,
+      </if>
+      <if test="unifiedCode != null" >
+        unified_code,
+      </if>
+      <if test="systemName != null" >
+        system_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="prescriptionName != null" >
+        #{prescriptionName,jdbcType=VARCHAR},
+      </if>
+      <if test="unifiedCode != null" >
+        #{unifiedCode,jdbcType=VARCHAR},
+      </if>
+      <if test="systemName != null" >
+        #{systemName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updatePrescription" parameterType="com.tangu.tcmts.po.Prescription" >
+    update prescription
+    <set >
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="prescriptionName != null" >
+        prescription_name = #{prescriptionName,jdbcType=VARCHAR},
+      </if>
+      <if test="unifiedCode != null" >
+        unified_code = #{unifiedCode,jdbcType=VARCHAR},
+      </if>
+      <if test="systemName != null" >
+        system_name = #{systemName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modUser != null" >
+        mod_user = #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="modTime != null" >
+        mod_time = #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="listPrescriptionByHospital" parameterType="java.lang.Integer" resultType = "com.tangu.tcmts.po.Prescription">
+  		SELECT p.`hospital_id`,p.`prescription_name`,m.`medicine_name`,pd.`medicine_id`,pd.`weight` 
+		FROM prescription p,prescription_detail pd ,medicine m
+		WHERE p.`id` = pd.`prescription_id` AND pd.`medicine_id` = m.`id`
+		AND p.`hospital_id` = #{hospitalId}
+  </select>
+</mapper>

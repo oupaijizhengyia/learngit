@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.PrintItemMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.PrintItem" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="page_id" property="pageId" jdbcType="INTEGER" />
+    <result column="field_id" property="fieldId" jdbcType="INTEGER" />
+    <result column="item_x" property="itemX" jdbcType="INTEGER" />
+    <result column="item_y" property="itemY" jdbcType="INTEGER" />
+    <result column="item_width" property="itemWidth" jdbcType="INTEGER" />
+    <result column="item_height" property="itemHeight" jdbcType="INTEGER" />
+    <result column="item_para" property="itemPara" jdbcType="VARCHAR" />
+    <result column="font_family" property="fontFamily" jdbcType="VARCHAR" />
+    <result column="font_size" property="fontSize" jdbcType="INTEGER" />
+    <result column="font_weight" property="fontWeight" jdbcType="BIT" />
+    <result column="font_style" property="fontStyle" jdbcType="BIT" />
+    <result column="font_decoration" property="fontDecoration" jdbcType="BIT" />
+    <result column="text_align" property="textAlign" jdbcType="VARCHAR" />
+    <result column="letter_spacing" property="letterSpacing" jdbcType="INTEGER" />
+    <result column="background_color" property="backgroundColor" jdbcType="BIT" />
+    <result column="auto_size" property="autoSize" jdbcType="BIT" />
+  </resultMap>
+
+  <insert id="insertBatch" parameterType="com.tangu.tcmts.po.PrintPage" >
+    insert into print_item (page_id, field_id, item_x, 
+      item_y, item_width, item_height, 
+      item_para, font_family, font_size, 
+      font_weight, font_style, font_decoration, 
+      text_align, letter_spacing,background_color, auto_size)
+    values
+    <foreach collection="printItemList" item="item" index="index" separator="," >
+      (#{id,jdbcType=INTEGER}, #{item.fieldId,jdbcType=INTEGER}, #{item.itemX,jdbcType=INTEGER},
+      #{item.itemY,jdbcType=INTEGER}, #{item.itemWidth,jdbcType=INTEGER}, #{item.itemHeight,jdbcType=INTEGER},
+      #{item.itemPara,jdbcType=VARCHAR}, #{item.fontFamily,jdbcType=VARCHAR}, #{item.fontSize,jdbcType=INTEGER},
+      #{item.fontWeight,jdbcType=BIT}, #{item.fontStyle,jdbcType=BIT}, #{item.fontDecoration,jdbcType=BIT},
+      #{item.textAlign,jdbcType=VARCHAR}, #{item.letterSpacing,jdbcType=INTEGER},#{item.backgroundColor,jdbcType=BIT},
+      #{item.autoSize,jdbcType=BIT}
+      )
+    </foreach>
+  </insert>
+
+  <resultMap id="listPrintFieldResultMap" type="com.tangu.tcmts.po.PrintField" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="field_name" property="fieldName" jdbcType="VARCHAR" />
+    <result column="field_type" property="fieldType" jdbcType="VARCHAR" />
+    <result column="field_source" property="fieldSource" jdbcType="VARCHAR" />
+    <result column="field_para" property="fieldPara" jdbcType="VARCHAR" />
+    <result column="display_text" property="displayText" jdbcType="VARCHAR" />
+    <result column="display_width" property="displayWidth" jdbcType="INTEGER" />
+    <result column="display_height" property="displayHeight" jdbcType="INTEGER" />
+  </resultMap>
+
+  <select id="listPrintField" resultMap="listPrintFieldResultMap">
+    select * from print_field where is_hidden=0
+  </select>
+
+  <select id="listPrintItemByPageId"  parameterType="java.lang.Integer" resultType="com.tangu.tcmts.po.PrintItem">
+    select print_item.*,
+     print_field.field_name,
+     print_field.field_type,
+     print_field.field_source,
+     print_field.display_text
+	from print_item, print_field
+    where page_id=#{VALUE } and print_item.field_id=print_field.id
+  </select>
+  
+   <resultMap id="printPageItemResultMap" type="com.tangu.tcmts.po.PrintItem" >
+  </resultMap>
+  <select id="listPrintItem" parameterType="java.util.List" resultMap="printPageItemResultMap">
+    SELECT
+    pi.id,pi.page_id,pi.field_id, pi.item_x, pi.item_y, pi.item_width, pi.item_height, 
+    pi.item_para, pi.font_family, pi.font_size, pi.font_weight, pi.font_style, 
+    pi.font_decoration, pi.text_align, pi.letter_spacing,pi.background_color, pi.auto_size,
+    pf.field_type,pf.field_source  
+    FROM 
+    print_item pi, 
+    print_field pf
+    WHERE 
+    pi.field_Id=pf.id
+   	AND pi.page_id IN(
+    	<foreach collection="list" item="item" index="index" separator=",">
+    		#{item}
+    	</foreach>
+   	)
+  </select>	
+</mapper>

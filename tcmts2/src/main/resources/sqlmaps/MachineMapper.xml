@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.MachineMapper">
+	<resultMap id="BaseResultMap" type="com.tangu.tcmts.po.MachineDO">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="machine_code" property="machineCode" jdbcType="VARCHAR" />
+		<result column="machine_type" property="machineType" jdbcType="VARCHAR" />
+		<result column="pack_machine_code" property="packMachineCode"
+			jdbcType="VARCHAR" />
+		<result column="machine_status" property="machineStatus"
+			jdbcType="INTEGER" />
+		<result column="checktor_id" property="checktorId" jdbcType="INTEGER" />
+		<result column="check_time" property="checkTime" jdbcType="TIMESTAMP" />
+		<result column="health_status" property="healthStatus"
+			jdbcType="INTEGER" />
+		<result column="ster_status" property="sterStatus" jdbcType="INTEGER" />
+		<result column="use_state" property="useState" jdbcType="BIT" />
+		<result column="packing_mac" property="packingMac" jdbcType="VARCHAR" />
+		<result column="tag_printer_num" property="tagPrinterNum"
+			jdbcType="VARCHAR" />
+		<result column="tp_mac" property="tpMac" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+		<result column="mod_user" property="modUser" jdbcType="INTEGER" />
+		<result column="modUserName" property="modUserName" jdbcType="VARCHAR" />
+	</resultMap>
+	<select id="listMachines" parameterType="com.tangu.tcmts.po.MachineDTO"
+		resultMap="BaseResultMap">
+		SELECT
+		m.id,m.`machine_code`,m.`machine_type`,m.`pack_machine_code`,m.`machine_status`,m.`health_status`,
+		m.`ster_status`,m.`mod_time`,m.`use_state`,e.`employee_name` AS modUserName ,m.`check_time`
+		FROM `machine` m
+		LEFT JOIN `employee` e ON
+		e.`id`=m.`checktor_id`
+		<where>
+			<if test="machineCode != null and machineCode != ''">
+				m.machine_code Like CONCAT('%',#{machineCode},'%')
+			</if>
+			<if test="machineStatus != null">
+				AND m.machine_status = #{machineStatus}
+			</if>
+			<if test="useState != null">
+				AND m.use_state = #{useState}
+			</if>
+			<if test="id != null">
+				AND m.id = #{id}
+			</if>
+		</where>
+		ORDER BY m.mod_time DESC
+	</select>
+	<update id="updateUseState" parameterType="com.tangu.tcmts.po.MachineDTO">
+		UPDATE machine SET
+		use_state = #{useState},
+		mod_user=#{modUser},
+		mod_time=NOW()
+		where id=#{id}
+	</update>
+	<insert id="insertMachine" parameterType="com.tangu.tcmts.po.MachineDO">
+	  <selectKey resultType="java.lang.Integer" keyProperty="id"
+			order="AFTER">
+			SELECT @@IDENTITY
+		</selectKey>
+		INSERT INTO
+		`machine`(machine_code,machine_type,pack_machine_code,packing_mac,tp_mac)
+		VALUES(#{machineCode},#{machineType},#{packMachineCode},#{packingMac},#{tpMac})
+	</insert>
+	<select id="getMachineCode" parameterType="com.tangu.tcmts.po.MachineDO"
+		resultMap="BaseResultMap">
+		SELECT id FROM `machine` WHERE machine_code=#{machineCode}
+		<if test="id != null">
+			AND id!=#{id}
+		</if>
+	</select>
+	<update id="updateMachine" parameterType="com.tangu.tcmts.po.MachineDO">
+		UPDATE machine
+		SET
+		machine_code=#{machineCode},
+		machine_type=#{machineType},
+		pack_machine_code=#{packMachineCode},
+		packing_mac=#{packingMac},
+		tp_mac=#{tpMac},
+		mod_user=#{modUser},
+		mod_time=NOW()
+		WHERE id=#{id}
+	</update>
+	<select id="getMachineById" parameterType="com.tangu.tcmts.po.MachineDTO"
+		resultMap="BaseResultMap">
+		SELECT id,machine_code,machine_type,pack_machine_code,packing_mac,tp_mac FROM
+		machine
+		where id=#{id}
+	</select>
+	<select id="listMachinesById" parameterType="java.util.List" resultMap="BaseResultMap">
+		SELECT
+		m.id,m.`machine_code`,m.`machine_type`,m.`pack_machine_code`,m.`machine_status`,m.`health_status`,
+		m.`ster_status`,m.`mod_time`,m.`use_state`,e.`employee_name` AS	modUserName 
+		FROM `machine` m
+		LEFT JOIN `employee` e ON e.`id`=m.`checktor_id`
+		WHERE m.id in 
+		<foreach item="item" collection="list" separator="," open="("  close=")">
+			#{item.id}
+		</foreach>
+	</select>
+	<update id="updateMachineStatus" parameterType="com.tangu.tcmts.po.MachineDO">
+		UPDATE machine
+		SET
+		machine_status=#{machineStatus},
+		mod_user=#{modUser},
+		mod_time=NOW()
+		WHERE id=#{id}
+	</update>
+	<update id="updateMachineByCode" parameterType="com.tangu.tcmts.po.MachineDO">
+		UPDATE machine
+		SET
+		machine_status=#{machineStatus},
+		checktor_id=#{checktorId},
+		check_time=#{checkTime},
+		health_status=#{healthStatus},
+		ster_status=#{sterStatus}
+		WHERE machine_code=#{machineCode}
+	</update>
+	<select id="listMachinesByCode" parameterType="com.tangu.tcmts.po.MachineDO" resultMap="BaseResultMap">
+		SELECT id,machine_code,machine_status,health_status,use_state,ster_status FROM machine WHERE machine_code=#{machineCode}
+	</select>
+	<select id="getNotUseMachineList" resultMap="BaseResultMap">
+		select machine_code from machine where start_use=1 and machine_status=0 
+   		order by machine_code
+	</select>
+</mapper>

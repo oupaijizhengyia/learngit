@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tangu.tcmts.dao.BoilProjectMapper">
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.BoilProject">
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, project_name, soak_time, first_boil_time, second_boil_time, volume, create_time, 
+    mod_user, mod_time
+  </sql>
+  <select id="listBoilProject" parameterType="com.tangu.tcmts.po.BoilProject" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from boil_project
+    <where>
+      <if test="projectName != null and projectName != ''">
+        and project_name = #{projectName}
+      </if>
+      <if test="id != null">
+        and id = #{id}
+      </if>
+    </where>
+    order by mod_time desc
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from boil_project
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insertSelective" parameterType="com.tangu.tcmts.po.BoilProject">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into boil_project
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="projectName != null and projectName != ''">
+        project_name,
+      </if>
+      <if test="soakTime != null">
+        soak_time,
+      </if>
+      <if test="firstBoilTime != null">
+        first_boil_time,
+      </if>
+      <if test="secondBoilTime != null">
+        second_boil_time,
+      </if>
+      <if test="volume != null">
+        volume,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="modUser != null">
+        mod_user,
+      </if>
+      <if test="modTime != null">
+        mod_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="projectName != null">
+        #{projectName,jdbcType=VARCHAR},
+      </if>
+      <if test="soakTime != null">
+        #{soakTime,jdbcType=INTEGER},
+      </if>
+      <if test="firstBoilTime != null">
+        #{firstBoilTime,jdbcType=INTEGER},
+      </if>
+      <if test="secondBoilTime != null">
+        #{secondBoilTime,jdbcType=INTEGER},
+      </if>
+      <if test="volume != null">
+        #{volume,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modUser != null">
+        #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="modTime != null">
+        #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tangu.tcmts.po.BoilProject">
+    update boil_project
+    <set>
+      <if test="projectName != null">
+        project_name = #{projectName,jdbcType=VARCHAR},
+      </if>
+      <if test="soakTime != null">
+        soak_time = #{soakTime,jdbcType=INTEGER},
+      </if>
+      <if test="firstBoilTime != null">
+        first_boil_time = #{firstBoilTime,jdbcType=INTEGER},
+      </if>
+      <if test="secondBoilTime != null">
+        second_boil_time = #{secondBoilTime,jdbcType=INTEGER},
+      </if>
+      <if test="volume != null">
+        volume = #{volume,jdbcType=DECIMAL},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modUser != null">
+        mod_user = #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="modTime != null">
+        mod_time = #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

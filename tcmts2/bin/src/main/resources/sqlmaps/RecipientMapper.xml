@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.RecipientMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.Recipient" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="recipient_name" property="recipientName" jdbcType="VARCHAR" />
+    <result column="recipient_tel" property="recipientTel" jdbcType="VARCHAR"/>
+    <result column="consignee" property="consignee" jdbcType="VARCHAR" />
+    <result column="consignee_tel" property="consigneeTel" jdbcType="VARCHAR" />
+    <result column="sex" property="sex" jdbcType="VARCHAR" />
+    <result column="age" property="age" jdbcType="VARCHAR" />
+    <result column="recipient_address" property="recipientAddress" jdbcType="VARCHAR" />
+    <result column="province" property="province" jdbcType="VARCHAR" />
+    <result column="city" property="city" jdbcType="VARCHAR" />
+    <result column="region" property="region" jdbcType="VARCHAR" />
+    <result column="initial_code" property="initialCode" jdbcType="VARCHAR" />
+    <result column="target_code" property="targetCode" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="mod_time" property="modTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, recipient_name, recipient_tel, consignee, consignee_tel, sex, age, recipient_address, 
+    province, city, region, initial_code, target_code, create_time, mod_time
+  </sql>
+  <select id="getRecipientList" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.Recipient" >
+    select 
+    <include refid="Base_Column_List" />
+    from recipient
+    where recipient_name =#{recipientName}
+  </select>
+  <insert id="insert" parameterType="com.tangu.tcmts.po.Recipient" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into recipient (recipient_name, recipient_tel, consignee, 
+      consignee_tel, sex, age, 
+      recipient_address, province, city, 
+      region, initial_code, target_code, 
+      create_time, mod_time)
+    values (#{recipientName,jdbcType=VARCHAR}, #{recipientTel,jdbcType=VARCHAR}, #{consignee,jdbcType=VARCHAR}, 
+      #{consigneeTel,jdbcType=VARCHAR}, #{sex,jdbcType=VARCHAR}, #{age,jdbcType=VARCHAR}, 
+      #{recipientAddress,jdbcType=VARCHAR}, #{province,jdbcType=VARCHAR}, #{city,jdbcType=VARCHAR}, 
+      #{region,jdbcType=VARCHAR}, #{initialCode,jdbcType=VARCHAR}, #{targetCode,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{modTime,jdbcType=TIMESTAMP})
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tangu.tcmts.po.Recipient" >
+    update recipient
+    <set >
+      <if test="recipientName != null" >
+        recipient_name = #{recipientName,jdbcType=VARCHAR},
+      </if>
+      <if test="recipientTel != null" >
+        recipient_tel = #{recipientTel,jdbcType=VARCHAR},
+      </if>
+      <if test="consignee != null" >
+        consignee = #{consignee,jdbcType=VARCHAR},
+      </if>
+      <if test="consigneeTel != null" >
+        consignee_tel = #{consigneeTel,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=VARCHAR},
+      </if>
+      <if test="age != null" >
+        age = #{age,jdbcType=VARCHAR},
+      </if>
+      <if test="recipientAddress != null" >
+        recipient_address = #{recipientAddress,jdbcType=VARCHAR},
+      </if>
+      <if test="province != null" >
+        province = #{province,jdbcType=VARCHAR},
+      </if>
+      <if test="city != null" >
+        city = #{city,jdbcType=VARCHAR},
+      </if>
+      <if test="region != null" >
+        region = #{region,jdbcType=VARCHAR},
+      </if>
+      <if test="initialCode != null" >
+        initial_code = #{initialCode,jdbcType=VARCHAR},
+      </if>
+      <if test="targetCode != null" >
+        target_code = #{targetCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modTime != null" >
+        mod_time = #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

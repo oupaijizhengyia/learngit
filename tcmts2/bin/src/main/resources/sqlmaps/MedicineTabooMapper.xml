@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.MedicineTabooMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.MedicineTaboo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="parent_medicine_id" property="parentMedicineId" jdbcType="INTEGER" />
+    <result column="sub_medicine_id" property="subMedicineId" jdbcType="INTEGER" />
+    <result column="taboo_type" property="tabooType" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="mod_user" property="modUser" jdbcType="INTEGER" />
+    <result column="mod_time" property="modTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <select id="getMedicineTabooList" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.MedicineTaboo">
+    SELECT
+    mt.id, m.medicine_name AS parent_medicine_name, md.medicine_name AS sub_medicine_name,
+    mt.create_time, mt.mod_user, mt.mod_time,taboo_type,mt.sub_medicine_id,mt.parent_medicine_id,
+    sl.label AS taboo_type_name
+    FROM medicine_taboo mt 
+    LEFT JOIN medicine m ON mt.parent_medicine_id=m.id
+    LEFT JOIN medicine md ON mt.sub_medicine_id=md.id
+    LEFT JOIN sys_lookup sl ON sl.value=mt.taboo_type
+    <where>
+    sl.code='tabooType'
+    <if test="parentMedicineName != null">
+      AND
+      (
+      m.medicine_name LIKE CONCAT('%',#{parentMedicineName},'%')
+      OR
+      m.initial_code LIKE CONCAT('%',#{parentMedicineName},'%')
+      OR
+      m.mnemonic_code LIKE CONCAT('%',#{parentMedicineName},'%')
+      OR
+      md.medicine_name LIKE CONCAT('%',#{parentMedicineName},'%')
+      OR
+      md.initial_code LIKE CONCAT('%',#{parentMedicineName},'%')
+      OR
+      md.mnemonic_code LIKE CONCAT('%',#{parentMedicineName},'%')
+      )
+    </if>
+    <if test="tabooType != null">
+        AND mt.taboo_type=#{tabooType}
+    </if>
+    <if test="id != null">
+        AND mt.id=#{id}
+    </if>
+    </where>
+    ORDER BY mt.create_time DESC
+  </select>
+
+  <select id="getRepeatMedicineTaboo" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.MedicineTaboo">
+      SELECT parent_medicine_id,sub_medicine_id FROM medicine_taboo
+      WHERE (sub_medicine_id=#{parentMedicineId} AND parent_medicine_id=#{subMedicineId})
+      OR  (sub_medicine_id=#{subMedicineId} AND parent_medicine_id=#{parentMedicineId})
+      <if test="id != null">
+        AND id != #{id}
+      </if>
+  </select>
+
+  <insert id="insertMedicineTaboo" parameterType="com.tangu.tcmts.po.MedicineTaboo" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into medicine_taboo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="parentMedicineId != null" >
+        parent_medicine_id,
+      </if>
+      <if test="subMedicineId != null" >
+        sub_medicine_id,
+      </if>
+      <if test="tabooType != null" >
+        taboo_type,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="modUser != null" >
+        mod_user,
+      </if>
+      <if test="modTime != null" >
+        mod_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="parentMedicineId != null" >
+        #{parentMedicineId,jdbcType=INTEGER},
+      </if>
+      <if test="subMedicineId != null" >
+        #{subMedicineId,jdbcType=INTEGER},
+      </if>
+      <if test="tabooType != null" >
+        #{tabooType,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modUser != null" >
+        #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="modTime != null" >
+        #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateMedicineTaboo" parameterType="com.tangu.tcmts.po.MedicineTaboo" >
+    update medicine_taboo
+    <set >
+      <if test="parentMedicineId != null" >
+        parent_medicine_id = #{parentMedicineId,jdbcType=INTEGER},
+      </if>
+      <if test="subMedicineId != null" >
+        sub_medicine_id = #{subMedicineId,jdbcType=INTEGER},
+      </if>
+      <if test="tabooType != null" >
+        taboo_type = #{tabooType,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modUser != null" >
+        mod_user = #{modUser,jdbcType=INTEGER},
+      </if>
+      <if test="modTime != null" >
+        mod_time = #{modTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="getMedicineTabooUnionMap" resultType="com.tangu.tcmts.po.MedicineTaboo" parameterType="com.tangu.tcmts.po.MedicineTaboo">
+    SELECT CONCAT(sub_medicine_id,'_',parent_medicine_id) subMedicineName ,sys_lookup.label AS tabooTypeName 
+    FROM medicine_taboo
+ 	LEFT JOIN sys_lookup ON medicine_taboo.taboo_type=sys_lookup.value AND sys_lookup.code='tabooType'
+ 	GROUP BY subMedicineName
+  </select>
+</mapper>

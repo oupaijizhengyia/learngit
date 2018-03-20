@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tangu.tcmts.dao.ExceptionCaseMapper" >
+  <resultMap id="BaseResultMap" type="com.tangu.tcmts.po.ExceptionCase" >
+  </resultMap>
+  
+  <select id="listExceptionCases" resultMap="BaseResultMap" parameterType="com.tangu.tcmts.po.ExceptionCase" >
+    select 
+    ec.id, e.employee_name as creatorName, ec.creator_id,
+		e1.employee_name as dealUserName, deal_user, 
+		e2.employee_name AS dutyName, duty_id, 
+		recipe_id, r.sys_recipe_code AS recipeCode, exception_time, 
+		sl.label as exceptionName, ec.exception_type,
+		exception_comment, 
+    deal_status, deal_result, deal_time
+    from exception_case ec
+    LEFT JOIN employee e on ec.creator_id = e.id
+	LEFT JOIN employee e1 on ec.deal_user = e1.id
+	LEFT JOIN employee e2 on ec.duty_id = e2.id
+	LEFT JOIN sys_lookup sl on sl.code = 'exceptionType' and ec.exception_type = sl.value
+	LEFT JOIN recipe r ON r.id = ec.recipe_id
+	WHERE 
+	UNIX_TIMESTAMP(ec.exception_time) >= UNIX_TIMESTAMP(#{startDate}) 
+	AND
+	UNIX_TIMESTAMP(DATE_FORMAT(ec.exception_time,'%y-%m-%d')) 
+	&lt;= UNIX_TIMESTAMP(DATE_FORMAT(#{endDate},'%y-%m-%d')) 
+	<if test=" exceptionType != null ">
+      AND exception_type = #{exceptionType}
+    </if>
+    <if test=" dealStatus != null ">
+      AND deal_status = #{dealStatus}
+    </if>
+    Order by ec.exception_time DESC
+  </select>
+  
+  <insert id="insertExceptionCase" parameterType="com.tangu.tcmts.po.ExceptionCase" >
+    
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into exception_case
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+    	recipe_id, creator_id, exception_type, duty_id, exception_comment
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+    	#{recipeId,jdbcType=INTEGER},
+    	#{creatorId,jdbcType=INTEGER}, #{exceptionType,jdbcType=INTEGER},
+    	#{dutyId,jdbcType=INTEGER}, #{exceptionComment,jdbcType=VARCHAR}	
+    </trim>
+  </insert>
+  
+  <update id="updateDealExceptionCase" parameterType="com.tangu.tcmts.po.ExceptionCase" >
+  	update exception_case
+  	<set >
+	  	<if test="dealStatus != null">
+		  	deal_status= #{dealStatus, jdbcType=INTEGER},
+		</if>
+		<if test="dealResult != null and dealResult != ''">
+	   		deal_result = #{dealResult,jdbcType=VARCHAR}, 
+	   	</if>
+	   	<if test="dealTime != null">
+	   		deal_time = #{dealTime,jdbcType=TIMESTAMP},
+	   	</if>
+	   	<if test="dealUser != null">
+	   		deal_user = #{dealUser,jdbcType=INTEGER},
+	   	</if>
+		<if test="recipeId != null">
+	   		recipe_id = #{recipeId, jdbcType=INTEGER},
+		</if>
+	   	<if test="exceptionType != null"> 
+	   		exception_type = #{exceptionType, jdbcType=INTEGER},
+	   	</if>
+	   	<if test="dutyId != null"> 
+	   		duty_id = #{dutyId, jdbcType=INTEGER},
+	   	</if>
+	   	<if test="exceptionComment != null and exceptionComment != ''"> 
+	   		exception_comment = #{exceptionComment, jdbcType=VARCHAR}
+	   	</if>	
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="getExceptionCaseById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    ec.id, e.employee_name as creatorName, ec.creator_id,
+		e1.employee_name as dealUserName, deal_user, 
+		e2.employee_name AS dutyName, duty_id, 
+		recipe_id, r.sys_recipe_code AS recipeCode, exception_time, 
+		sl.label as exceptionName, ec.exception_type, 
+		exception_comment, 
+    deal_status, deal_result, deal_time
+    from exception_case ec
+  	LEFT JOIN employee e on ec.creator_id = e.id
+	LEFT JOIN employee e1 on ec.deal_user = e1.id
+	LEFT JOIN employee e2 on ec.duty_id = e2.id
+	LEFT JOIN sys_lookup sl on sl.code = 'exceptionType' and ec.exception_type = sl.value
+	LEFT JOIN recipe r ON r.id = ec.recipe_id
+	WHERE ec.id = #{id,jdbcType=INTEGER}
+  </select>
+  <insert id="saveExceptionCaseByApp" parameterType="com.tangu.tcmts.po.ExceptionCase" >
+    
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into exception_case
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+    	recipe_id,creator_id, exception_type,exception_time, exception_comment
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+    	#{recipeId,jdbcType=INTEGER}),
+    	#{creatorId,jdbcType=INTEGER}),
+    	#{exceptionType,jdbcType=INTEGER},
+    	#{exceptionTime,jdbcType=TIMESTAMP},
+    	#{exceptionComment,jdbcType=VARCHAR}	
+    </trim>
+  </insert>
+</mapper>
